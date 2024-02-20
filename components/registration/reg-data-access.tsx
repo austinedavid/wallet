@@ -65,8 +65,10 @@ export const useMnemonic = () => {
 // this part control the user check for password
 export const useVerify = () => {
   const route = useRouter();
-  const user = localStorage.getItem("wallet-password");
-  if (user) {
-    return route.push("/wallet/portfiolo");
+  if (typeof window !== "undefined") {
+    const user = localStorage.getItem("wallet-password");
+    if (user) {
+      return route.push("/wallet/portfiolo");
+    }
   }
 };
