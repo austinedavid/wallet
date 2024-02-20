@@ -8,6 +8,7 @@ import { Input } from "../ui/input";
 import { ToastContainer } from "react-toastify";
 import toast, { Toaster } from "react-hot-toast";
 import * as mnemonic from "bip39";
+import { RotatingLines, Audio } from "react-loader-spinner";
 
 export const RightPart = () => {
   return (
@@ -43,8 +44,8 @@ export const LeftPart = () => {
   const staticd = "david";
   if (getseed.isLoading) {
     return (
-      <div className=" flex-1 h-screen md:h-full bg-slate-900 text-white items-center justify-center">
-        <p>loading now</p>
+      <div className=" flex-1 flex min-h-screen md:h-full bg-slate-900 text-white items-center justify-center">
+        <Audio height="80" width="80" color="tomato" ariaLabel="loading" />
       </div>
     );
   }
@@ -149,9 +150,7 @@ export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
   // here, we verify if the both arrays are the same
   const handleConfirm = () => {
     const firstArrays = seedArray.join(" ");
-    console.log(firstArrays);
     const secondArrays = words.join(" ");
-    console.log(secondArrays);
     if (firstArrays != secondArrays) {
       return alert("not equal");
     }
