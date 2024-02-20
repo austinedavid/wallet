@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 export const useMnemonic = () => {
   const route = useRouter();
   const Strings =
@@ -8,6 +9,7 @@ export const useMnemonic = () => {
   // to copy the seed phrase
   const handleCopy = () => {
     navigator.clipboard.writeText(Strings);
+    toast.success("Phrase copied successfully!!");
   };
   // to set item to the local storage
   const setLocalStorage = () => {
@@ -17,5 +19,25 @@ export const useMnemonic = () => {
     localStorage.setItem("wallet-password", item);
     route.push("/wallet/portfilo");
   };
-  return { mnemoicArray, handleCopy, setLocalStorage, savePassword };
+  // this function downloads the seed phrase when clicked with the name
+  // seed-phrase.txt
+  const handleDownload = () => {
+    const blob = new Blob([Strings], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "seed-phrase.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("seed phrase downloaded");
+  };
+  return {
+    mnemoicArray,
+    handleCopy,
+    setLocalStorage,
+    savePassword,
+    handleDownload,
+  };
 };

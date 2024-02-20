@@ -5,6 +5,8 @@ import { useMnemonic } from "./reg-data-access";
 import React, { useState, Dispatch, SetStateAction } from "react";
 import { seedArray } from "./types";
 import { Input } from "../ui/input";
+import { ToastContainer } from "react-toastify";
+import toast, { Toaster } from "react-hot-toast";
 
 export const RightPart = () => {
   return (
@@ -89,13 +91,13 @@ export const Fewtext = ({ page }: { page: number }) => {
 };
 // the generate phrase part
 export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
-  const { handleCopy } = useMnemonic();
+  const { handleCopy, handleDownload } = useMnemonic();
   return (
     <>
       <div className=" mt-4 w-full p-4 border-[0.5px] border-slate-500">
         <div className=" grid grid-cols-3 gap-2">
           {seedArray.map((value, index) => (
-            <div className=" flex gap-3" key={index}>
+            <div className=" flex gap-3 items-center " key={index}>
               <p>{index + 1}</p>
               <p>{value}</p>
             </div>
@@ -106,7 +108,7 @@ export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
           <div onClick={handleCopy}>
             <p className=" text-[tomato] font-bold cursor-pointer">COPY</p>
           </div>
-          <div>
+          <div onClick={handleDownload}>
             <p className=" text-[tomato] font-bold cursor-pointer">DOWNLOAD</p>
           </div>
         </div>
@@ -119,6 +121,7 @@ export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
           <p>I SAVED MY RECOVERY PHRASE</p>
         </div>
       </div>
+      <Toaster />
     </>
   );
 };
@@ -189,8 +192,9 @@ export const Enterpassword = () => {
   const [password, setpassword] = useState("");
   const [confirmpassword, setconfirmpassword] = useState("");
   const handleSubmit = () => {
-    if (!password || !confirmpassword) return alert("inputs are needed");
-    if (password != confirmpassword) return alert("password does not match");
+    if (!password || !confirmpassword) return toast.error("inputs are needed");
+    if (password != confirmpassword)
+      return toast.error("password does not match");
     savePassword(password);
   };
   return (
@@ -220,6 +224,7 @@ export const Enterpassword = () => {
           <p className=" text-[12px] md:text-[18px]">CONTINUE</p>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };
