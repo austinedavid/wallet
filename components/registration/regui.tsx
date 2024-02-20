@@ -7,7 +7,27 @@ import { seedArray } from "./types";
 import { Input } from "../ui/input";
 
 export const RightPart = () => {
-  return <div className=" flex-1 h-full bg-slate-950">right part</div>;
+  return (
+    <div className=" flex-1 h-screen md:h-full bg-slate-950 ">
+      <div className="flex flex-col w-full mt-[100px] mb-[100px] md:mt-0 md:mb-0 md:h-full items-center justify-center gap-4">
+        <Image src={"/vault.jpg"} alt="" width={150} height={150} />
+        <div className=" text-slate-300 flex items-center flex-col">
+          <div className=" flex flex-col items-center justify-between">
+            <p className=" font-bold text-lg">
+              Never share your recovery phrase
+            </p>
+            <p className=" font-bold text-lg">with anyone</p>
+          </div>
+          <div className=" flex flex-col items-center justify-between">
+            <p className=" text-sm">
+              Anyone who has it can access your funds from
+            </p>
+            <p className="  text-sm">anywhere, keep is secure!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 interface setPage {
@@ -69,6 +89,7 @@ export const Fewtext = ({ page }: { page: number }) => {
 };
 // the generate phrase part
 export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
+  const { handleCopy } = useMnemonic();
   return (
     <>
       <div className=" mt-4 w-full p-4 border-[0.5px] border-slate-500">
@@ -82,7 +103,7 @@ export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
         </div>
         <hr className="mt-2 mb-4 bg-slate-500 border-slate-500" />
         <div className=" flex items-center justify-between ">
-          <div>
+          <div onClick={handleCopy}>
             <p className=" text-[tomato] font-bold cursor-pointer">COPY</p>
           </div>
           <div>
@@ -104,6 +125,7 @@ export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
 // confirm the phrase
 export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
   const [words, setword] = useState(Array(seedArray.length).fill(""));
+  const { setLocalStorage } = useMnemonic();
   // lets fill in the array of word state with this function
   const handleWordFill = (index: number, word: string) => {
     const newword = [...words];
@@ -117,10 +139,23 @@ export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
     if (firstArrays != secondArrays) {
       return alert("not equal");
     }
+    setLocalStorage();
     setpage(2);
+  };
+  // paste the copied item to the boxes
+  const handlepaste = async () => {
+    const copiedItem = await navigator.clipboard.readText();
+    const turnToArray = copiedItem.split(" ");
+    setword(turnToArray);
   };
   return (
     <>
+      <div
+        onClick={handlepaste}
+        className=" p-2 rounded-md bg-[tomato] mt-2 w-fit cursor-pointer"
+      >
+        <p>Paste phrase</p>
+      </div>
       <div className=" grid grid-cols-3 gap-3 mt-4">
         {seedArray.map((seed, index) => (
           <div
@@ -150,6 +185,14 @@ export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
 // enter password part
 // this is the last part of the authentication process
 export const Enterpassword = () => {
+  const { savePassword } = useMnemonic();
+  const [password, setpassword] = useState("");
+  const [confirmpassword, setconfirmpassword] = useState("");
+  const handleSubmit = () => {
+    if (!password || !confirmpassword) return alert("inputs are needed");
+    if (password != confirmpassword) return alert("password does not match");
+    savePassword(password);
+  };
   return (
     <div className=" mt-24 flex flex-col gap-4">
       <p>Set a password for your wallet</p>
@@ -158,15 +201,22 @@ export const Enterpassword = () => {
           className=" bg-transparent border-x-0 border-t-0  focus:outline-none"
           type="text"
           placeholder="New Password"
+          onChange={(e) => setpassword(e.target.value)}
+          value={password}
         />
         <Input
           className=" bg-transparent border-x-0 border-t-0  focus:outline-none"
           type="text"
           placeholder="Repeat Password"
+          onChange={(e) => setconfirmpassword(e.target.value)}
+          value={confirmpassword}
         />
       </div>
       <div className=" w-full flex items-center justify-center">
-        <div className=" cursor-pointer flex items-center justify-center w-[50%] md:w-[40%] ease-in-out duration-700 transition px-4 py-2 bg-gradient-to-r from-[tomato] to-yellow-600 hover:bg-gradient-to-r hover:from-yellow-600 hover:to-[tomato]  rounded-md">
+        <div
+          onClick={handleSubmit}
+          className=" cursor-pointer flex items-center justify-center w-[50%] md:w-[40%] ease-in-out duration-700 transition px-4 py-2 bg-gradient-to-r from-[tomato] to-yellow-600 hover:bg-gradient-to-r hover:from-yellow-600 hover:to-[tomato]  rounded-md"
+        >
           <p className=" text-[12px] md:text-[18px]">CONTINUE</p>
         </div>
       </div>
