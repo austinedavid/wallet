@@ -4,6 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import * as mnemonic from "bip39";
+import Cookies from "js-cookie";
 
 // created custome hook to handle everything about wallet setup
 // authentication and routing to portfiolo if there is password
@@ -35,7 +36,7 @@ export const useMnemonic = () => {
     localStorage.setItem("seed-phrase", phrase);
   };
   const savePassword = (item: string) => {
-    localStorage.setItem("wallet-password", item);
+    Cookies.set("wallet-password", item);
     route.push("/wallet/portfiolo");
   };
   // this function downloads the seed phrase when clicked with the name
@@ -65,10 +66,8 @@ export const useMnemonic = () => {
 // this part control the user check for password
 export const useVerify = () => {
   const route = useRouter();
-  if (typeof window !== "undefined") {
-    const user = localStorage.getItem("wallet-password");
-    if (user) {
-      return route.push("/wallet/portfiolo");
-    }
+  const user = Cookies.get("wallet-password");
+  if (user) {
+    return route.push("/wallet/portfiolo");
   }
 };
