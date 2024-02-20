@@ -2,11 +2,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMnemonic } from "./reg-data-access";
-import React, { useState, Dispatch, SetStateAction } from "react";
+import React, { useState, Dispatch, SetStateAction, useMemo } from "react";
 import { seedArray } from "./types";
 import { Input } from "../ui/input";
 import { ToastContainer } from "react-toastify";
 import toast, { Toaster } from "react-hot-toast";
+import * as mnemonic from "bip39";
 
 export const RightPart = () => {
   return (
@@ -38,7 +39,17 @@ interface setPage {
 }
 export const LeftPart = () => {
   const [page, setpage] = useState<number>(0);
-  const { mnemoicArray } = useMnemonic();
+  const { getseed, mnemoicArray } = useMnemonic();
+  const staticd = "david";
+  if (getseed.isLoading) {
+    return (
+      <div className=" flex-1 h-screen md:h-full bg-slate-900 text-white items-center justify-center">
+        <p>loading now</p>
+      </div>
+    );
+  }
+  // lets break the strings into an arrays
+
   return (
     <div className=" flex-1 h-full bg-slate-900 text-white px-4 relative pb-2">
       <Nav />
@@ -105,10 +116,10 @@ export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
         </div>
         <hr className="mt-2 mb-4 bg-slate-500 border-slate-500" />
         <div className=" flex items-center justify-between ">
-          <div onClick={handleCopy}>
+          <div onClick={() => handleCopy(seedArray.join(" "))}>
             <p className=" text-[tomato] font-bold cursor-pointer">COPY</p>
           </div>
-          <div onClick={handleDownload}>
+          <div onClick={() => handleDownload(seedArray.join(" "))}>
             <p className=" text-[tomato] font-bold cursor-pointer">DOWNLOAD</p>
           </div>
         </div>
@@ -138,11 +149,13 @@ export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
   // here, we verify if the both arrays are the same
   const handleConfirm = () => {
     const firstArrays = seedArray.join(" ");
+    console.log(firstArrays);
     const secondArrays = words.join(" ");
+    console.log(secondArrays);
     if (firstArrays != secondArrays) {
       return alert("not equal");
     }
-    setLocalStorage();
+    setLocalStorage(seedArray.join(" "));
     setpage(2);
   };
   // paste the copied item to the boxes
