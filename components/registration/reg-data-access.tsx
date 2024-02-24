@@ -5,6 +5,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import * as mnemonic from "bip39";
 import Cookies from "js-cookie";
+import { Keypair } from "@solana/web3.js";
 
 // created custome hook to handle everything about wallet setup
 // authentication and routing to portfiolo if there is password
@@ -33,7 +34,13 @@ export const useMnemonic = () => {
   };
   // to set item to the local storage
   const setLocalStorage = (phrase: string) => {
-    localStorage.setItem("seed-phrase", phrase);
+    // lets convert the seed phrase to secrete seed
+    const seed = mnemonic.mnemonicToSeedSync(phrase);
+    // lets split the 64base string to base 32 which is used in solana
+    const base32Seed = Keypair.fromSeed(seed.slice(0, 32));
+    // here, we formed an array which we will then store to the cookie
+    const seedArray = `${base32Seed.secretKey.toString()}`;
+    Cookies.set("secrete-seed", JSON.stringify(seedArray));
   };
   const savePassword = (item: string) => {
     Cookies.set("wallet-password", item);
@@ -67,6 +74,7 @@ export const useMnemonic = () => {
 export const useVerify = () => {
   const route = useRouter();
   const user = Cookies.get("wallet-password");
+  const phrase = Cookies.get("secrete-seed");
   if (user) {
     return route.push("/wallet/portfiolo");
   }
