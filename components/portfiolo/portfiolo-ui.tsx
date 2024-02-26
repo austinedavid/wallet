@@ -276,16 +276,12 @@ export function DrawerDialogDemo({ small }: { small: boolean }) {
           Send
         </div>
       </DrawerTrigger>
-      <DrawerContent className="px-4">
+      <DrawerContent className="px-4 bg-slate-900">
         <DrawerHeader className="text-left">
           <DrawerTitle>Send</DrawerTitle>
         </DrawerHeader>
         <SendForm className="" />
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <DrawerFooter className="pt-2"></DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
@@ -293,20 +289,25 @@ export function DrawerDialogDemo({ small }: { small: boolean }) {
 
 function SendForm({ className }: React.ComponentProps<"form">) {
   return (
-    <div>
+    <div className=" flex flex-col space-y-2 mt-6">
       {/* div for the first part and also the text and the input */}
       <div>
-        <div>
-          <p>Token</p>
-          <p>Max:3.823789</p>
+        <div className=" w-full flex items-center justify-between">
+          <p className=" text-gray-400 text-[12px]">Token</p>
+          <p className=" text-white text-[12px]">Max:3.823789</p>
         </div>
-        <div>
-          <div>
-            <Image src="/vault.jpg" alt="" width={20} height={20} />
-            <p>SOL</p>
-            <KeyboardArrowDownIcon />
+        <div className=" w-full flex items-center py-3 px-2 bg-slate-800 rounded-sm space-x-1">
+          <div className=" flex w-[70px] space-x-1">
+            <Image
+              className="rounded-full"
+              src="/vault.jpg"
+              alt=""
+              width={20}
+              height={20}
+            />
+            <p className="text-white font-bold">SOL</p>
           </div>
-          <input />
+          <input className=" bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none" />
         </div>
       </div>
       {/* div for the second part */}
