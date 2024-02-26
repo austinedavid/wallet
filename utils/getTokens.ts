@@ -84,7 +84,7 @@ const getPda = async (mint: PublicKey) => {
   return pda;
 };
 // getting the solana details of the user here
-async function getSolsInfo(
+export async function getSolsInfo(
   pubkey: PublicKey,
   connection: Connection
 ): Promise<Itoken> {

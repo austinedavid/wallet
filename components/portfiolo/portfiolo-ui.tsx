@@ -39,8 +39,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useSolInfo, userSubstring } from "./portfilo-data-access";
+
 // the first div in the portfiolo component and also in the collection
-export const SharedDiv = () => {
+export const SharedDiv = ({ solInfo }: { solInfo: Itoken }) => {
   return (
     <div className=" w-full md:h-[70px] sm:bg-slate-700 rounded-md px-4 py-2 flex flex-col sm:flex-row items-center sm:items-start md:items-center justify-center sm:justify-between gap-2 sm:gap-0 ">
       <div className=" flex flex-col md:flex-row items-center gap-4 md:gap-8 h-full">
@@ -49,7 +51,7 @@ export const SharedDiv = () => {
         <DivWithAddress />
       </div>
       <div>
-        <RightFirst />
+        <RightFirst solInfo={solInfo} />
       </div>
     </div>
   );
@@ -98,11 +100,11 @@ export const AddressSubstring = () => {
 };
 
 // the right part of the first div right part
-export const RightFirst = () => {
+export const RightFirst = ({ solInfo }: { solInfo: Itoken }) => {
   return (
     <div className=" flex gap-3 items-center">
       <TransactionBtn value={"Receive"} small={false} />
-      <DrawerDialogDemo small={false} />
+      <SendBtn solInfo={solInfo} small={false} />
     </div>
   );
 };
@@ -165,7 +167,7 @@ export const EachToken = ({ data }: { data: Itoken }) => {
       <div className=" hidden items-center md:flex justify-end">
         <div className=" self-end flex items-center space-x-2 text-white">
           <div className=" hidden group-hover:block ease-in-out duration-300 transform">
-            <TransactionBtn value={"Send"} small={true} />
+            <SendBtn solInfo={data} small={true} />
           </div>
           <div className=" w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 transform ease-in-out duration-300">
             <DropdownDiv data={data} />
@@ -178,26 +180,15 @@ export const EachToken = ({ data }: { data: Itoken }) => {
 
 // here we get the token names and symbols
 export const TokenNames = ({ data }: { data: Itoken }) => {
-  // generating a subtext for coins without  names and symbols
-  const firstPath = data.address?.substring(0, 4);
-  const lastPath = data.address?.substring(
-    data.address.length - 4,
-    data.address.length
-  );
-  const joinedPath = `${firstPath}...${lastPath}`;
+  const { joinedPath } = userSubstring(data.address as string);
   return (
     <div className=" flex gap-2 items-center">
       {data.image ? (
         <div className=" w-[40px] h-[40px] rounded-full bg-black flex items-center justify-center">
-          <Image src={"/vault.jpg"} alt="" width={30} height={30} />
+          <Image src={data.image!} alt="" width={30} height={30} />
         </div>
       ) : (
-        <div className=" text-white w-[40px] h-[40px] rounded-full bg-black relative flex items-center justify-center">
-          <QuestionMarkOutlinedIcon style={{ fontSize: 16 }} />
-          <div className=" text-black absolute bottom-0 left-6 bg-yellow-500 w-[20px] h-[20px] rounded-full flex items-center justify-center">
-            <PriorityHighOutlinedIcon style={{ fontSize: 10 }} />
-          </div>
-        </div>
+        <NoImageDiv big={true} />
       )}
       {data.name ? (
         <div>
@@ -209,6 +200,25 @@ export const TokenNames = ({ data }: { data: Itoken }) => {
           <p className="text-white">{joinedPath}</p>
         </div>
       )}
+    </div>
+  );
+};
+
+export const NoImageDiv = ({ big }: { big: boolean }) => {
+  return (
+    <div
+      className={` text-white ${
+        big ? "w-[40px] h-[40px]" : "w-[30px] h-[30px]"
+      }  rounded-full bg-black relative flex items-center justify-center`}
+    >
+      <QuestionMarkOutlinedIcon style={{ fontSize: 16 }} />
+      <div
+        className={` text-black absolute bottom-0 left-6 bg-yellow-500 ${
+          big ? "w-[20px] h-[20px]" : "w-[13px] h-[13px]"
+        }  rounded-full flex items-center justify-center`}
+      >
+        <PriorityHighOutlinedIcon style={{ fontSize: 10 }} />
+      </div>
     </div>
   );
 };
@@ -235,7 +245,13 @@ export const DropdownDiv = ({ data }: { data: Itoken }) => {
 };
 
 // here we create the drawer button
-export function DrawerDialogDemo({ small }: { small: boolean }) {
+export function SendBtn({
+  small,
+  solInfo,
+}: {
+  small: boolean;
+  solInfo: Itoken;
+}) {
   const { isDesktop } = useMediaQuery();
   const [open, setOpen] = React.useState(false);
 
@@ -257,7 +273,7 @@ export function DrawerDialogDemo({ small }: { small: boolean }) {
           <DialogHeader>
             <DialogTitle className="text-white">Send</DialogTitle>
           </DialogHeader>
-          <SendForm />
+          <SendForm solInfo={solInfo} />
         </DialogContent>
       </Dialog>
     );
@@ -280,36 +296,49 @@ export function DrawerDialogDemo({ small }: { small: boolean }) {
         <DrawerHeader className="text-left">
           <DrawerTitle className=" text-white font-bold">Send</DrawerTitle>
         </DrawerHeader>
-        <SendForm className="" />
+        <SendForm solInfo={solInfo} />
         <DrawerFooter className="pt-2"></DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
 }
 
-function SendForm({ className }: React.ComponentProps<"form">) {
+function SendForm({ solInfo }: { solInfo: Itoken }) {
+  const { joinedPath } = userSubstring(solInfo.address as string);
   return (
     <div className=" flex flex-col space-y-3 mt-6">
       {/* div for the first part and also the text and the input */}
       <div>
         <div className=" w-full flex items-center justify-between mb-[5px]">
           <p className=" text-gray-400 text-[12px]">Token</p>
-          <p className=" text-white text-[12px]">Max:3.823789</p>
+          <p className=" text-white text-[12px]">
+            Max:{solInfo.amt.toFixed(5)}
+          </p>
         </div>
         <div className=" w-full flex items-center py-3 px-2 bg-slate-800 rounded-sm space-x-1">
-          <div className=" flex w-[70px] space-x-1">
-            <Image
-              className="rounded-full"
-              src="/vault.jpg"
-              alt=""
-              width={20}
-              height={20}
-            />
-            <p className="text-white font-bold">SOL</p>
+          <div className=" flex  w-[130px] space-x-2 items-center">
+            {solInfo.image ? (
+              <Image
+                className="rounded-full"
+                src={solInfo?.image!}
+                alt=""
+                width={20}
+                height={20}
+              />
+            ) : (
+              <NoImageDiv big={false} />
+            )}
+            {solInfo.symbol ? (
+              <p className="text-white font-bold">
+                {solInfo.symbol.replace(/\0.*$/g, "")}
+              </p>
+            ) : (
+              <p className="text-white font-bold">{joinedPath}</p>
+            )}
           </div>
           <input
             type="text"
-            className=" text-right rtl bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none"
+            className=" text-right rtl bg-transparent text-gray-400 w-[calc(100%-130px)] border-0 border-transparent focus:outline-none"
           />
         </div>
       </div>

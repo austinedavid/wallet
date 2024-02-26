@@ -1,11 +1,15 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import { navItems } from "@/utils/statics";
 import Link from "next/link";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
+import { usePathname } from "next/navigation";
 
 const Nav = () => {
+  const path = usePathname();
+  const currentPath = path.split("/")[2];
   return (
     <div className=" w-full h-[120px] bg-slate-800 flex items-center justify-between px-3 sm:px-10 text-white border-b border-slate-500 transform">
       <Link href={"/wallet/portfiolo"}>
@@ -22,12 +26,25 @@ const Nav = () => {
           </p>
         </div>
       </Link>
-      <div className=" hidden sm:flex  gap-4">
+      <div className=" hidden sm:flex  gap-6">
         {navItems.map((item, index) => (
-          <div key={index}>
-            <Link className=" text-md" href={`/wallet/${item.toLowerCase()}`}>
+          <div
+            className=" flex flex-col items-center justify-center"
+            key={index}
+          >
+            <Link
+              className={` text-md ${
+                currentPath == item.toLocaleLowerCase() && " text-[tomato]"
+              } `}
+              href={`/wallet/${item.toLowerCase()}`}
+            >
               {item}
             </Link>
+            <div
+              className={`${
+                currentPath == item.toLocaleLowerCase() ? "block" : "hidden"
+              } mt-[-4px] w-[6px] h-[6px] rounded-full bg-[tomato]`}
+            ></div>
           </div>
         ))}
       </div>
