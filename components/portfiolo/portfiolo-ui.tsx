@@ -16,7 +16,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useMediaQuery } from "@/utils/getsize";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 // the first div in the portfiolo component and also in the collection
 export const SharedDiv = () => {
   return (
@@ -80,7 +102,7 @@ export const RightFirst = () => {
   return (
     <div className=" flex gap-3 items-center">
       <TransactionBtn value={"Receive"} small={false} />
-      <TransactionBtn value={"Send"} small={false} />
+      <DrawerDialogDemo small={false} />
     </div>
   );
 };
@@ -211,3 +233,90 @@ export const DropdownDiv = ({ data }: { data: Itoken }) => {
     </DropdownMenu>
   );
 };
+
+// here we create the drawer button
+export function DrawerDialogDemo({ small }: { small: boolean }) {
+  const { isDesktop } = useMediaQuery();
+  const [open, setOpen] = React.useState(false);
+
+  if (isDesktop) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <div
+            className={` ${
+              small
+                ? " bg-[tomato] px-4 py-2 text-black text-[12px] font-bold hover:bg-[coral]"
+                : "bg-slate-900 px-4 py-2 sm:px-6 sm:py-3 text-white hover:bg-slate-700  sm:hover:bg-slate-800"
+            }  rounded-md cursor-pointer transition-all transform ease-in-out duration-500 border-0 `}
+          >
+            Send
+          </div>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px] bg-slate-900">
+          <DialogHeader>
+            <DialogTitle className="text-white">Send</DialogTitle>
+          </DialogHeader>
+          <SendForm />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
+        <div
+          className={` ${
+            small
+              ? " bg-[tomato] px-4 py-2 text-black text-[12px] font-bold hover:bg-[coral]"
+              : "bg-slate-900 px-4 py-2 sm:px-6 sm:py-3 text-white hover:bg-slate-700  sm:hover:bg-slate-800"
+          }  rounded-md cursor-pointer transition-all transform ease-in-out duration-500 border-0 `}
+        >
+          Send
+        </div>
+      </DrawerTrigger>
+      <DrawerContent className="px-4">
+        <DrawerHeader className="text-left">
+          <DrawerTitle>Send</DrawerTitle>
+        </DrawerHeader>
+        <SendForm className="" />
+        <DrawerFooter className="pt-2">
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+function SendForm({ className }: React.ComponentProps<"form">) {
+  return (
+    <div>
+      {/* div for the first part and also the text and the input */}
+      <div>
+        <div>
+          <p>Token</p>
+          <p>Max:3.823789</p>
+        </div>
+        <div>
+          <div>
+            <Image src="/vault.jpg" alt="" width={20} height={20} />
+            <p>SOL</p>
+            <KeyboardArrowDownIcon />
+          </div>
+          <input />
+        </div>
+      </div>
+      {/* div for the second part */}
+      <div>
+        <p>Recipient</p>
+        <input />
+      </div>
+      <div>
+        <p>Send</p>
+      </div>
+    </div>
+  );
+}
