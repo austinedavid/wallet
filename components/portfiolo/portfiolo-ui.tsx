@@ -278,7 +278,7 @@ export function DrawerDialogDemo({ small }: { small: boolean }) {
       </DrawerTrigger>
       <DrawerContent className="px-4 bg-slate-900">
         <DrawerHeader className="text-left">
-          <DrawerTitle>Send</DrawerTitle>
+          <DrawerTitle className=" text-white font-bold">Send</DrawerTitle>
         </DrawerHeader>
         <SendForm className="" />
         <DrawerFooter className="pt-2"></DrawerFooter>
@@ -289,10 +289,10 @@ export function DrawerDialogDemo({ small }: { small: boolean }) {
 
 function SendForm({ className }: React.ComponentProps<"form">) {
   return (
-    <div className=" flex flex-col space-y-2 mt-6">
+    <div className=" flex flex-col space-y-3 mt-6">
       {/* div for the first part and also the text and the input */}
       <div>
-        <div className=" w-full flex items-center justify-between">
+        <div className=" w-full flex items-center justify-between mb-[5px]">
           <p className=" text-gray-400 text-[12px]">Token</p>
           <p className=" text-white text-[12px]">Max:3.823789</p>
         </div>
@@ -307,15 +307,21 @@ function SendForm({ className }: React.ComponentProps<"form">) {
             />
             <p className="text-white font-bold">SOL</p>
           </div>
-          <input className=" bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none" />
+          <input
+            type="text"
+            className=" text-right rtl bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none"
+          />
         </div>
       </div>
       {/* div for the second part */}
-      <div>
-        <p>Recipient</p>
-        <input />
+      <div className=" flex flex-col space-y-[5px] ">
+        <p className=" text-gray-400 text-[12px]">Recipient</p>
+        <div className=" py-3 px-2 bg-slate-800 rounded-sm w-full flex items-center">
+          <input className=" bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none" />
+        </div>
       </div>
-      <div>
+      <hr className="bg-gray-500 border-gray-500 mt-4 mb-4" />
+      <div className=" cursor-pointer w-full py-3 flex items-center justify-center rounded-md bg-slate-600 text-white font-bold">
         <p>Send</p>
       </div>
     </div>
