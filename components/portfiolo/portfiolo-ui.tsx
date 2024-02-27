@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { walletKeypair } from "@/utils/getWallet";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import QrCodeIcon from "@mui/icons-material/QrCode";
@@ -40,15 +40,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useSolInfo, userSubstring } from "./portfilo-data-access";
+import { useRouter } from "next/navigation";
 
 // the first div in the portfiolo component and also in the collection
-export const SharedDiv = ({ solInfo }: { solInfo: Itoken }) => {
+export const SharedDiv = ({
+  solInfo,
+  homepage,
+}: {
+  solInfo: Itoken;
+  homepage: boolean;
+}) => {
   return (
     <div className=" w-full md:h-[70px] sm:bg-slate-700 rounded-md px-4 py-2 flex flex-col sm:flex-row items-center sm:items-start md:items-center justify-center sm:justify-between gap-2 sm:gap-0 ">
       <div className=" flex flex-col md:flex-row items-center gap-4 md:gap-8 h-full">
-        <DivwithPrice />
+        <DivwithPrice homepage={homepage} solInfo={solInfo} />
         <div className="hidden md:block w-[1px] h-full bg-white"></div>
-        <DivWithAddress />
+        <DivWithAddress homepage={homepage} solInfo={solInfo} />
       </div>
       <div>
         <RightFirst solInfo={solInfo} />
@@ -57,29 +64,59 @@ export const SharedDiv = ({ solInfo }: { solInfo: Itoken }) => {
   );
 };
 // the div showing the sol price
-export const DivwithPrice = () => {
+export const DivwithPrice = ({
+  homepage,
+  solInfo,
+}: {
+  homepage: boolean;
+  solInfo: Itoken;
+}) => {
   return (
-    <div className=" flex flex-col sm:flex-row items-center gap-3">
-      <div className=" w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-red-400"></div>
-      <div className=" flex flex-col items-center sm:items-start">
-        <p className=" text-gray-200 text-[12px]">Total portfolio value</p>
-        <p className=" text-[20px] text-white">$346.09</p>
-      </div>
-    </div>
+    <>
+      {homepage ? (
+        <div className=" flex flex-col sm:flex-row items-center gap-3">
+          <div className=" w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-red-400"></div>
+          <div className=" flex flex-col items-center sm:items-start">
+            <p className=" text-gray-200 text-[12px]">Total portfolio value</p>
+            <p className=" text-[20px] text-white">$346.09</p>
+          </div>
+        </div>
+      ) : (
+        <TokenNames column={true} data={solInfo} />
+      )}
+    </>
   );
 };
 // the div showing the address and copy
-export const DivWithAddress = () => {
+export const DivWithAddress = ({
+  homepage,
+  solInfo,
+}: {
+  homepage: boolean;
+  solInfo: Itoken;
+}) => {
   return (
-    <div className=" sm:flex space-x-2 hidden ">
-      <AddressSubstring />
-      <div className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500">
-        <ContentCopyIcon style={{ fontSize: 18 }} />
-      </div>
-      <div className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500">
-        <QrCodeIcon style={{ fontSize: 18 }} />
-      </div>
-    </div>
+    <>
+      {homepage ? (
+        <div className=" sm:flex space-x-2 hidden ">
+          <AddressSubstring />
+          <div className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500">
+            <ContentCopyIcon style={{ fontSize: 18 }} />
+          </div>
+          <div className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500">
+            <QrCodeIcon style={{ fontSize: 18 }} />
+          </div>
+        </div>
+      ) : (
+        <div className=" sm:flex flex-col hidden  ">
+          <p className=" text-gray-400 ">Amount</p>
+          <div className=" flex space-x-1 text-white">
+            <p>{solInfo.amt}</p>
+            {solInfo.name && <p>{solInfo.name.replace(/\0.*$/g, "")}</p>}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -151,17 +188,54 @@ export const TokenDiv = ({ data }: { data: Itoken[] }) => {
 };
 
 export const EachToken = ({ data }: { data: Itoken }) => {
+  const divRef = useRef<HTMLDivElement>(null);
+  const priceRef = useRef<HTMLDivElement>(null);
+  const amtRef = useRef<HTMLDivElement>(null);
+  const dataRef = useRef<HTMLDivElement>(null);
+  const route = useRouter();
+  const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (
+      e.target === divRef.current ||
+      e.target === priceRef.current ||
+      e.target === amtRef.current ||
+      e.target === dataRef.current
+    ) {
+      return route.push(
+        `/wallet/portfiolo/${
+          data.address == undefined
+            ? "11111111111111111111111111111111"
+            : data.address
+        }`
+      );
+    }
+  };
   return (
     // items here should be in grid
-    <div className=" flex items-center justify-between group md:grid md:grid-cols-5 py-4 px-2 border-b md:border-y border-gray-500 w-full md:hover:border-slate-800 md:hover:bg-slate-800 transform ease-in-out duration-500 cursor-pointer">
-      <TokenNames data={data} />
-      <div className="text-white hidden md:flex items-center">
+    <div
+      ref={divRef}
+      onClick={handleClick}
+      className=" flex items-center justify-between group md:grid md:grid-cols-5 py-4 px-2 border-b md:border-y border-gray-500 w-full md:hover:border-slate-800 md:hover:bg-slate-800 transform ease-in-out duration-500 cursor-pointer"
+    >
+      <TokenNames column={false} data={data} />
+      <div
+        onClick={handleClick}
+        ref={priceRef}
+        className="text-white hidden md:flex items-center"
+      >
         <p>{data.price}</p>
       </div>
-      <div className=" text-white hidden md:flex items-center">
+      <div
+        onClick={handleClick}
+        ref={dataRef}
+        className=" text-white hidden md:flex items-center"
+      >
         {data.price && <p>{(data?.price! * data.amt).toFixed(2)}</p>}
       </div>
-      <div className="text-white flex items-center">
+      <div
+        onClick={handleClick}
+        ref={amtRef}
+        className="text-white flex items-center"
+      >
         <p>{data.amt}</p>
       </div>
       <div className=" hidden items-center md:flex justify-end">
@@ -179,10 +253,20 @@ export const EachToken = ({ data }: { data: Itoken }) => {
 };
 
 // here we get the token names and symbols
-export const TokenNames = ({ data }: { data: Itoken }) => {
+export const TokenNames = ({
+  data,
+  column,
+}: {
+  data: Itoken;
+  column: boolean;
+}) => {
   const { joinedPath } = userSubstring(data.address as string);
   return (
-    <div className=" flex gap-2 items-center">
+    <div
+      className={` flex ${
+        column ? " flex-col sm:flex-row" : "flex-row"
+      } gap-2 items-center`}
+    >
       {data.image ? (
         <div className=" w-[40px] h-[40px] rounded-full bg-black flex items-center justify-center">
           <Image src={data.image!} alt="" width={30} height={30} />
@@ -191,9 +275,15 @@ export const TokenNames = ({ data }: { data: Itoken }) => {
         <NoImageDiv big={true} />
       )}
       {data.name ? (
-        <div>
-          <p className=" text-white">{data.name}</p>
-          <p className=" text-gray-400 text-[12px]">{data.symbol}</p>
+        <div
+          className={`${
+            column && " flex flex-col items-center sm:items-start"
+          }`}
+        >
+          <p className=" text-white">{data.name.replace(/\0.*$/g, "")}</p>
+          <p className=" text-gray-400 text-[12px]">
+            {data.symbol?.replace(/\0.*$/g, "")}
+          </p>
         </div>
       ) : (
         <div>

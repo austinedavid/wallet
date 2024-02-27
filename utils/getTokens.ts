@@ -102,5 +102,6 @@ export async function getSolsInfo(
     image: "https://solana.com/favicon.ico",
     price,
     value: amt * price,
+    address: "11111111111111111111111111111111",
   };
 }

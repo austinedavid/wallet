@@ -11,7 +11,7 @@ const PortfioloFeatures = async () => {
 
   return (
     <div>
-      <SharedDiv solInfo={onlysol} />
+      <SharedDiv homepage={true} solInfo={onlysol} />
       <div className=" w-full py-0 px-0 sm:py-6 sm:px-6 bg-slate-700 mt-6 rounded-md flex flex-col gap-3">
         <p className=" hidden sm:block text-white font-bold text-[23px]">
           Assets
