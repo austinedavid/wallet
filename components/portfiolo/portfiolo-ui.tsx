@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { walletKeypair } from "@/utils/getWallet";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import QrCodeIcon from "@mui/icons-material/QrCode";
@@ -39,9 +39,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useSolInfo, userSubstring } from "./portfilo-data-access";
+import { useSolInfo, userSubstring, useCopy } from "./portfilo-data-access";
 import { useRouter } from "next/navigation";
-
+import Qrcode from "react-qr-code";
+import { createQR, encodeURL } from "@solana/pay";
+import toast, { Toaster } from "react-hot-toast";
 // the first div in the portfiolo component and also in the collection
 export const SharedDiv = ({
   solInfo,
@@ -140,8 +142,8 @@ export const AddressSubstring = () => {
 export const RightFirst = ({ solInfo }: { solInfo: Itoken }) => {
   return (
     <div className=" flex gap-3 items-center">
-      <TransactionBtn value={"Receive"} small={false} />
-      <SendBtn solInfo={solInfo} small={false} />
+      <SendBtn value={"Receive"} solInfo={solInfo} small={false} />
+      <SendBtn value={"Send"} solInfo={solInfo} small={false} />
     </div>
   );
 };
@@ -241,7 +243,7 @@ export const EachToken = ({ data }: { data: Itoken }) => {
       <div className=" hidden items-center md:flex justify-end">
         <div className=" self-end flex items-center space-x-2 text-white">
           <div className=" hidden group-hover:block ease-in-out duration-300 transform">
-            <SendBtn solInfo={data} small={true} />
+            <SendBtn value={"Send"} solInfo={data} small={true} />
           </div>
           <div className=" w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 transform ease-in-out duration-300">
             <DropdownDiv data={data} />
@@ -338,9 +340,11 @@ export const DropdownDiv = ({ data }: { data: Itoken }) => {
 export function SendBtn({
   small,
   solInfo,
+  value,
 }: {
   small: boolean;
   solInfo: Itoken;
+  value: string;
 }) {
   const { isDesktop } = useMediaQuery();
   const [open, setOpen] = React.useState(false);
@@ -356,15 +360,22 @@ export function SendBtn({
                 : "bg-slate-900 px-4 py-2 sm:px-6 sm:py-3 text-white hover:bg-slate-700  sm:hover:bg-slate-800"
             }  rounded-md cursor-pointer transition-all transform ease-in-out duration-500 border-0 `}
           >
-            Send
+            {value}
           </div>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px] bg-slate-900">
           <DialogHeader>
-            <DialogTitle className="text-white">Send</DialogTitle>
+            {value == "Send" && (
+              <DialogTitle className="text-white">Send</DialogTitle>
+            )}
           </DialogHeader>
-          <SendForm solInfo={solInfo} />
+          {value == "Send" ? (
+            <SendForm solInfo={solInfo} />
+          ) : (
+            <ReceiveForm solInfo={solInfo} />
+          )}
         </DialogContent>
+        <Toaster />
       </Dialog>
     );
   }
@@ -379,16 +390,23 @@ export function SendBtn({
               : "bg-slate-900 px-4 py-2 sm:px-6 sm:py-3 text-white hover:bg-slate-700  sm:hover:bg-slate-800"
           }  rounded-md cursor-pointer transition-all transform ease-in-out duration-500 border-0 `}
         >
-          Send
+          {value}
         </div>
       </DrawerTrigger>
       <DrawerContent className="px-4 bg-slate-900">
         <DrawerHeader className="text-left">
-          <DrawerTitle className=" text-white font-bold">Send</DrawerTitle>
+          {value == "Send" && (
+            <DrawerTitle className=" text-white font-bold">Send</DrawerTitle>
+          )}
         </DrawerHeader>
-        <SendForm solInfo={solInfo} />
+        {value == "Send" ? (
+          <SendForm solInfo={solInfo} />
+        ) : (
+          <ReceiveForm solInfo={solInfo} />
+        )}
         <DrawerFooter className="pt-2"></DrawerFooter>
       </DrawerContent>
+      <Toaster />
     </Drawer>
   );
 }
@@ -446,3 +464,64 @@ function SendForm({ solInfo }: { solInfo: Itoken }) {
     </div>
   );
 }
+
+// the compoent below is used for displaying the receipt part
+export const ReceiveForm = ({ solInfo }: { solInfo: Itoken }) => {
+  return (
+    <div>
+      {/* the top div showing name and image of token */}
+      <div className=" flex items-center space-x-2 text-white font-bold mb-3">
+        {solInfo.name == "Solana" && (
+          <Image src={solInfo.image!} alt="solana" width={25} height={25} />
+        )}
+        {solInfo.name ? (
+          <p>
+            Receive{" "}
+            {`${solInfo.name.replace(/\0.*$/g, "")} (${solInfo.symbol?.replace(
+              /\0.*$/g,
+              ""
+            )})`}
+          </p>
+        ) : (
+          <p>Receive Token</p>
+        )}
+      </div>
+      <div>
+        <hr />
+      </div>
+      {/* image showing the qrcode */}
+      <QrcodeDiv sol={solInfo.symbol!} />
+    </div>
+  );
+};
+
+export const QrcodeDiv = ({ sol }: { sol: string }) => {
+  const address = "Gu6YtszBvwy5jng1GeMmmH2CkmnNAhVax4fXDvn17fV1";
+  const qrRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const q = createQR(address, 200, "white", "black");
+    if (qrRef.current) {
+      qrRef.current.innerHTML = "";
+      q.append(qrRef.current);
+    }
+  }, []);
+  return (
+    <div className=" mt-3 w-full flex flex-col gap-3 items-center">
+      <div ref={qrRef} className=""></div>
+      <div className=" w-full flex flex-col  item-center justify-center text-white content-center">
+        <p className=" text-center">Your {sol == "Sol" && "Sol"} address</p>
+        <p className=" text-[12px] text-center">
+          Gu6YtszBvwy5jng1GeMmmH2CkmnNAhVax4fXDvn17fV1
+        </p>
+      </div>
+      <div>
+        <div
+          onClick={() => useCopy().copyaddress(address)}
+          className=" text-black w-fit px-6 py-2 bg-[tomato] rounded-md font-bold cursor-pointer"
+        >
+          <p>Copy address</p>
+        </div>
+      </div>
+    </div>
+  );
+};

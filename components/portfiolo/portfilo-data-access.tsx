@@ -3,6 +3,7 @@ import React from "react";
 import { getSolsInfo, Itoken } from "@/utils/getTokens";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 // exporting solana custome hook details which will be used in the portfiolo page
 export const useSolInfo = () => {
@@ -26,4 +27,12 @@ export const userSubstring = (address: string) => {
   const lastPath = address?.substring(address.length - 3, address.length);
   const joinedPath = `${firstPath}...${lastPath}`;
   return { joinedPath };
+};
+
+export const useCopy = () => {
+  const copyaddress = (address: string) => {
+    window.navigator.clipboard.writeText(address);
+    toast.success("address copied");
+  };
+  return { copyaddress };
 };
