@@ -496,6 +496,7 @@ export const ReceiveForm = ({ solInfo }: { solInfo: Itoken }) => {
 };
 
 export const QrcodeDiv = ({ sol }: { sol: string }) => {
+  const { copyaddress } = useCopy();
   const address = "Gu6YtszBvwy5jng1GeMmmH2CkmnNAhVax4fXDvn17fV1";
   const qrRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -516,7 +517,7 @@ export const QrcodeDiv = ({ sol }: { sol: string }) => {
       </div>
       <div>
         <div
-          onClick={() => useCopy().copyaddress(address)}
+          onClick={() => copyaddress(address)}
           className=" text-black w-fit px-6 py-2 bg-[tomato] rounded-md font-bold cursor-pointer"
         >
           <p>Copy address</p>
