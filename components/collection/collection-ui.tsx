@@ -31,6 +31,7 @@ export const RightForCollection = ({ solInfo }: { solInfo: Itoken }) => {
         value={"Receive"}
         solInfo={solInfo}
         small={false}
+        isNft={false}
       />
       <More />
     </div>
@@ -166,6 +167,7 @@ export const NoNft = ({ solInfo }: { solInfo: Itoken }) => {
             value={"Receive"}
             solInfo={solInfo}
             small={false}
+            isNft={false}
           />
         </div>
       </div>
