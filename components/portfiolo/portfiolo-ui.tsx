@@ -1,6 +1,5 @@
 "use client";
-import React, { useRef, useEffect } from "react";
-import { walletKeypair } from "@/utils/getWallet";
+import React, { useRef, useEffect, useState } from "react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import { Itoken } from "@/utils/getTokens";
@@ -12,75 +11,97 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMediaQuery } from "@/utils/getsize";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useSolInfo, userSubstring, useCopy } from "./portfilo-data-access";
+import { userSubstring, useCopy, useWallet } from "./portfilo-data-access";
 import { useRouter } from "next/navigation";
-import Qrcode from "react-qr-code";
-import { createQR, encodeURL } from "@solana/pay";
-import toast, { Toaster } from "react-hot-toast";
+import { createQR } from "@solana/pay";
+import { Toaster } from "react-hot-toast";
+import { RightForCollection } from "@/components/collection/collection-ui";
+import { NftSendBtnDiv } from "../singleNft/nft-ui";
+import { useDownload } from "../singleNft/nft-data-access";
 // the first div in the portfiolo component and also in the collection
 export const SharedDiv = ({
   solInfo,
   homepage,
+  collection,
 }: {
   solInfo: Itoken;
   homepage: boolean;
+  collection: boolean;
 }) => {
   return (
-    <div className=" w-full md:h-[70px] sm:bg-slate-700 rounded-md px-4 py-2 flex flex-col sm:flex-row items-center sm:items-start md:items-center justify-center sm:justify-between gap-2 sm:gap-0 ">
-      <div className=" flex flex-col md:flex-row items-center gap-4 md:gap-8 h-full">
-        <DivwithPrice homepage={homepage} solInfo={solInfo} />
-        <div className="hidden md:block w-[1px] h-full bg-white"></div>
-        <DivWithAddress homepage={homepage} solInfo={solInfo} />
+    <>
+      <div className=" w-full md:h-[70px] sm:bg-slate-700 rounded-md px-4 py-2 flex flex-col sm:flex-row items-center sm:items-start md:items-center justify-center sm:justify-between gap-2 sm:gap-0 ">
+        <div className=" flex flex-col md:flex-row items-center gap-4 md:gap-8 h-full">
+          <DivwithPrice
+            collection={collection}
+            homepage={homepage}
+            solInfo={solInfo}
+          />
+          {!collection && (
+            <>
+              <div className="hidden md:block w-[1px] h-full bg-white"></div>
+              <DivWithAddress homepage={homepage} solInfo={solInfo} />
+            </>
+          )}
+        </div>
+        <div>
+          {collection ? (
+            <RightForCollection solInfo={solInfo} />
+          ) : (
+            <RightFirst solInfo={solInfo} />
+          )}
+        </div>
       </div>
-      <div>
-        <RightFirst solInfo={solInfo} />
-      </div>
-    </div>
+      <Toaster />
+    </>
   );
 };
 // the div showing the sol price
 export const DivwithPrice = ({
   homepage,
   solInfo,
+  collection,
 }: {
   homepage: boolean;
   solInfo: Itoken;
+  collection: boolean;
 }) => {
   return (
     <>
-      {homepage ? (
+      {homepage || collection ? (
         <div className=" flex flex-col sm:flex-row items-center gap-3">
           <div className=" w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-red-400"></div>
           <div className=" flex flex-col items-center sm:items-start">
-            <p className=" text-gray-200 text-[12px]">Total portfolio value</p>
-            <p className=" text-[20px] text-white">$346.09</p>
+            {collection ? (
+              <p className=" text-gray-200 text-[12px]">Total floor value</p>
+            ) : (
+              <p className=" text-gray-200 text-[12px]">
+                Total portfolio value
+              </p>
+            )}
+            {collection ? (
+              <p className=" text-[20px] text-white">$0.00</p>
+            ) : (
+              <p className=" text-[20px] text-white">${solInfo.value}</p>
+            )}
           </div>
         </div>
       ) : (
@@ -97,16 +118,37 @@ export const DivWithAddress = ({
   homepage: boolean;
   solInfo: Itoken;
 }) => {
+  const { copyaddress } = useCopy();
+  const [showcopied, setshowcopied] = useState<boolean>(false);
+  const handleCopy = () => {
+    copyaddress();
+    // here we set copied to true and toggle it back to false after 5 seconds
+    setshowcopied(true);
+    setTimeout(() => {
+      setshowcopied(false);
+    }, 1000);
+  };
   return (
     <>
       {homepage ? (
-        <div className=" sm:flex space-x-2 hidden ">
+        <div className=" sm:flex space-x-2 hidden relative ">
           <AddressSubstring />
-          <div className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500">
+          <div
+            onClick={handleCopy}
+            className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500"
+          >
             <ContentCopyIcon style={{ fontSize: 18 }} />
           </div>
           <div className=" cursor-pointer w-[30px] h-[30px] flex items-center justify-center text-white rounded-full transition transform ease-in-out duration-500 hover:bg-slate-500">
             <QrCodeIcon style={{ fontSize: 18 }} />
+          </div>
+
+          <div
+            className={` transform translate duration-700  transition-opacity ${
+              showcopied ? "opacity-100" : "opacity-0"
+            }  ease-in-out bg-slate-500  px-4 py-2 rounded-sm absolute bottom-[-43px] left-[50px] `}
+          >
+            <p className="text-white  text-sm">copied</p>
           </div>
         </div>
       ) : (
@@ -118,22 +160,18 @@ export const DivWithAddress = ({
           </div>
         </div>
       )}
+      <Toaster />
     </>
   );
 };
 
 // the div below we generated the subString for the application
 export const AddressSubstring = () => {
-  // const { pubkey } = walletKeypair();
-  // const publicKey = pubkey().toString();
-  const publicKey = "jsjsjsjsjsjjsjsjssj";
-  //   below here we do the logics of generating the substring
-  const firstPath = publicKey.substring(0, 4);
-  const lastPath = publicKey.substring(publicKey.length - 4, publicKey.length);
-  const joinedPath = `${firstPath}...${lastPath}`;
+  const { pubkey } = useWallet();
+  const walletAddress = userSubstring(pubkey as string);
   return (
     <div>
-      <p className=" text-white font-bold">{joinedPath}</p>
+      <p className=" text-white font-bold">{walletAddress.joinedPath}</p>
     </div>
   );
 };
@@ -142,8 +180,20 @@ export const AddressSubstring = () => {
 export const RightFirst = ({ solInfo }: { solInfo: Itoken }) => {
   return (
     <div className=" flex gap-3 items-center">
-      <SendBtn value={"Receive"} solInfo={solInfo} small={false} />
-      <SendBtn value={"Send"} solInfo={solInfo} small={false} />
+      <SendBtn
+        portfiolo={true}
+        value={"Receive"}
+        solInfo={solInfo}
+        small={false}
+        isNft={false}
+      />
+      <SendBtn
+        portfiolo={true}
+        value={"Send"}
+        solInfo={solInfo}
+        small={false}
+        isNft={false}
+      />
     </div>
   );
 };
@@ -243,7 +293,13 @@ export const EachToken = ({ data }: { data: Itoken }) => {
       <div className=" hidden items-center md:flex justify-end">
         <div className=" self-end flex items-center space-x-2 text-white">
           <div className=" hidden group-hover:block ease-in-out duration-300 transform">
-            <SendBtn value={"Send"} solInfo={data} small={true} />
+            <SendBtn
+              portfiolo={true}
+              value={"Send"}
+              solInfo={data}
+              small={true}
+              isNft={false}
+            />
           </div>
           <div className=" w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 transform ease-in-out duration-300">
             <DropdownDiv data={data} />
@@ -316,6 +372,10 @@ export const NoImageDiv = ({ big }: { big: boolean }) => {
 };
 
 export const DropdownDiv = ({ data }: { data: Itoken }) => {
+  const { goToExplorer } = useDownload();
+  const handleExplorer = () => {
+    goToExplorer(data.address as string);
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -330,7 +390,9 @@ export const DropdownDiv = ({ data }: { data: Itoken }) => {
             <DropdownMenuItem>Stake</DropdownMenuItem>
           </>
         )}
-        <DropdownMenuItem>View on explorer</DropdownMenuItem>
+        <DropdownMenuItem className=" cursor-pointer" onClick={handleExplorer}>
+          View on explorer
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -341,10 +403,14 @@ export function SendBtn({
   small,
   solInfo,
   value,
+  portfiolo,
+  isNft,
 }: {
   small: boolean;
   solInfo: Itoken;
   value: string;
+  portfiolo: boolean;
+  isNft: boolean;
 }) {
   const { isDesktop } = useMediaQuery();
   const [open, setOpen] = React.useState(false);
@@ -370,9 +436,15 @@ export function SendBtn({
             )}
           </DialogHeader>
           {value == "Send" ? (
-            <SendForm solInfo={solInfo} />
+            <div>
+              {isNft ? (
+                <NftSendBtnDiv solInfo={solInfo} />
+              ) : (
+                <SendForm solInfo={solInfo} />
+              )}
+            </div>
           ) : (
-            <ReceiveForm solInfo={solInfo} />
+            <ReceiveForm portfiolo={portfiolo} solInfo={solInfo} />
           )}
         </DialogContent>
         <Toaster />
@@ -402,7 +474,7 @@ export function SendBtn({
         {value == "Send" ? (
           <SendForm solInfo={solInfo} />
         ) : (
-          <ReceiveForm solInfo={solInfo} />
+          <ReceiveForm portfiolo={portfiolo} solInfo={solInfo} />
         )}
         <DrawerFooter className="pt-2"></DrawerFooter>
       </DrawerContent>
@@ -466,15 +538,21 @@ function SendForm({ solInfo }: { solInfo: Itoken }) {
 }
 
 // the compoent below is used for displaying the receipt part
-export const ReceiveForm = ({ solInfo }: { solInfo: Itoken }) => {
+export const ReceiveForm = ({
+  solInfo,
+  portfiolo,
+}: {
+  solInfo: Itoken;
+  portfiolo: boolean;
+}) => {
   return (
     <div>
       {/* the top div showing name and image of token */}
       <div className=" flex items-center space-x-2 text-white font-bold mb-3">
-        {solInfo.name == "Solana" && (
+        {solInfo.name == "Solana" && portfiolo && (
           <Image src={solInfo.image!} alt="solana" width={25} height={25} />
         )}
-        {solInfo.name ? (
+        {solInfo.name && portfiolo ? (
           <p>
             Receive{" "}
             {`${solInfo.name.replace(/\0.*$/g, "")} (${solInfo.symbol?.replace(
@@ -483,7 +561,7 @@ export const ReceiveForm = ({ solInfo }: { solInfo: Itoken }) => {
             )})`}
           </p>
         ) : (
-          <p>Receive Token</p>
+          <div>{portfiolo ? <p>Receive Token</p> : <p>Receive</p>}</div>
         )}
       </div>
       <div>
@@ -497,27 +575,25 @@ export const ReceiveForm = ({ solInfo }: { solInfo: Itoken }) => {
 
 export const QrcodeDiv = ({ sol }: { sol: string }) => {
   const { copyaddress } = useCopy();
-  const address = "Gu6YtszBvwy5jng1GeMmmH2CkmnNAhVax4fXDvn17fV1";
+  const { pubkey } = useWallet();
   const qrRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const q = createQR(address, 200, "white", "black");
+    const q = createQR(`${pubkey}`, 200, "white", "black");
     if (qrRef.current) {
       qrRef.current.innerHTML = "";
       q.append(qrRef.current);
     }
-  }, []);
+  }, [pubkey]);
   return (
     <div className=" mt-3 w-full flex flex-col gap-3 items-center">
       <div ref={qrRef} className=""></div>
       <div className=" w-full flex flex-col  item-center justify-center text-white content-center">
         <p className=" text-center">Your {sol == "Sol" && "Sol"} address</p>
-        <p className=" text-[12px] text-center">
-          Gu6YtszBvwy5jng1GeMmmH2CkmnNAhVax4fXDvn17fV1
-        </p>
+        <p className=" text-[12px] text-center">{pubkey}</p>
       </div>
       <div>
         <div
-          onClick={() => copyaddress(address)}
+          onClick={() => copyaddress()}
           className=" text-black w-fit px-6 py-2 bg-[tomato] rounded-md font-bold cursor-pointer"
         >
           <p>Copy address</p>

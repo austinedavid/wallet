@@ -40,7 +40,7 @@ export const useMnemonic = () => {
     const base32Seed = Keypair.fromSeed(seed.slice(0, 32));
     // here, we formed an array which we will then store to the cookie
     const seedArray = `${base32Seed.secretKey.toString()}`;
-    Cookies.set("secrete-seed", JSON.stringify(seedArray));
+    Cookies.set("secrete-seed", seedArray, { expires: 10 * 365 });
   };
   const savePassword = (item: string) => {
     Cookies.set("wallet-password", item);

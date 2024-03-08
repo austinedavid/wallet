@@ -1,21 +1,34 @@
-"use client";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import Cookies from "js-cookie";
-import { useMemo } from "react";
 
-// this function handles the generation of the keypair needed
-// we will export the keypair and also export only the public key
-export const walletKeypair = () => {
-  const seedArray = useMemo(() => Cookies.get("secrete-seed"), []);
+export const walletKeypair = (cookieValue: string | undefined) => {
+  if (!cookieValue) {
+    console.error("Cookie 'secrete-seed' not found");
+    return null;
+  }
 
-  const parsedArray = JSON.parse(seedArray!) as number[];
-  const uintArray = Uint8Array.from(parsedArray);
-  const newKeypair = Keypair.fromSeed(uintArray);
+  const numberArray = cookieValue.split(",").map(Number);
+  if (numberArray.some(isNaN)) {
+    console.error("Invalid cookie value");
+    return null;
+  }
 
-  const pubkey = (): string => {
-    const walletPubkey = newKeypair.publicKey.toBase58();
-    return walletPubkey;
-  };
+  const uintArray = Uint8Array.from(numberArray);
+  const newKeypair = Keypair.fromSecretKey(uintArray);
 
-  return { pubkey, newKeypair };
+  const pubkey = newKeypair.publicKey.toBase58();
+
+  return { newKeypair, pubkey };
 };
+
+// const seedArray = localStorage.getItem("secrete-seed") as string;
+//   console.log(seedArray);
+//   const parsedArray = JSON.parse(seedArray as string) as number[];
+//   const uintArray = Uint8Array.from(parsedArray);
+//   const newKeypair = Keypair.fromSeed(uintArray);
+
+//   const pubkey = (): string => {
+//     const walletPubkey = newKeypair.publicKey.toBase58();
+//     return walletPubkey;
+//   };
+
+//   return { pubkey, newKeypair };

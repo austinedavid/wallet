@@ -7,6 +7,7 @@ import {
 import { TOKEN_PROGRAM_ID, AccountLayout } from "@solana/spl-token";
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
 import { Metaplex } from "@metaplex-foundation/js";
+import { walletKeypair } from "./getWallet";
 
 // this function returns all the token information and also the solana details of the owner
 
@@ -26,18 +27,35 @@ export interface Itoken {
   price?: number;
   value?: number;
 }
-export const tokens = async (): Promise<Itoken[]> => {
+export const tokens = async (
+  Cookievalue: string | undefined
+): Promise<Itoken[]> => {
   // todo, change the pubkey with the wallet pubkey
-  const pubkey = "Gu6YtszBvwy5jng1GeMmmH2CkmnNAhVax4fXDvn17fV1";
+  const walletdetails = walletKeypair(Cookievalue);
+  if (!walletdetails) {
+    return [];
+  }
+
+  const { pubkey } = walletdetails;
+  if (!pubkey) {
+    console.log("there is not pubkey in the wallet details");
+    return [];
+  }
   const connection = new Connection(clusterApiUrl("devnet"));
   //   first lets get the actual solana information about the address of the user
-  const solDetails = await getSolsInfo(new PublicKey(pubkey), connection);
+  const solDetails = await getSolsInfo(
+    new PublicKey(pubkey as string),
+    connection
+  );
   //   getting the tokens that belong to the owner of the wallet
   // here we use the public key and the token program id
   const alltokens = await connection.getTokenAccountsByOwner(
-    new PublicKey(pubkey),
+    new PublicKey(pubkey as string),
     { programId: TOKEN_PROGRAM_ID }
   );
+  if (alltokens.value.length === 0) {
+    return [solDetails];
+  }
   //   here, we map all the tokens to decode them and also
   // to perform there metadata check below
   const tokenList = await Promise.all(
@@ -95,13 +113,27 @@ export async function getSolsInfo(
   const solprice = await response.json();
   const price = solprice.solana.usd;
   const amt = solsdeatls?.lamports! / LAMPORTS_PER_SOL;
-  return {
-    name: "Solana",
-    symbol: "SOL",
-    amt,
-    image: "https://solana.com/favicon.ico",
-    price,
-    value: amt * price,
-    address: "11111111111111111111111111111111",
-  };
+  if (amt) {
+    return {
+      name: "Solana",
+      symbol: "SOL",
+      amt,
+      image:
+        "https://res.cloudinary.com/dffhwsp2h/image/upload/v1709612500/images/solana_jwpbpa.png",
+      price,
+      value: amt * price,
+      address: "11111111111111111111111111111111",
+    };
+  } else {
+    return {
+      name: "Solana",
+      symbol: "SOL",
+      amt: 0,
+      image:
+        "https://res.cloudinary.com/dffhwsp2h/image/upload/v1709612500/images/solana_jwpbpa.png",
+      price,
+      value: 0 * price,
+      address: "11111111111111111111111111111111",
+    };
+  }
 }
