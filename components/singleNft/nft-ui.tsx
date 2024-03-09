@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Itoken } from "@/utils/getTokens";
 import { SendBtn } from "../portfiolo/portfiolo-ui";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -14,6 +14,8 @@ import LanguageIcon from "@mui/icons-material/Language";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { useDownload } from "./nft-data-access";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import Image from "next/image";
 
 // exporting the top div in the individual nft page
 export const Topdiv = ({ nft }: { nft: Itoken }) => {
@@ -46,10 +48,80 @@ export const RightTop = ({ nft }: { nft: Itoken }) => {
   );
 };
 
+// this div consists of the things we need
+// for sending NFT to a particlar receiver
 export const NftSendBtnDiv = ({ solInfo }: { solInfo: Itoken }) => {
+  // state to control the copied icon
+  const [copy, setcopy] = useState<boolean>(false);
+  const [address, setaddress] = useState<string>("");
+  const handleCopy = async () => {
+    setcopy(true);
+    const clipboardItem = await window.navigator.clipboard.readText();
+    setaddress(clipboardItem);
+    setTimeout(() => {
+      setcopy(false);
+    }, 1000);
+  };
   return (
     <div>
-      <p>for the collectibles</p>
+      <div className=" flex flex-col gap-2 mt-2">
+        <hr className="bg-slate-500 border-slate-500" />
+        {/* the div containing the input for the address */}
+        <div className=" flex flex-col mt-2">
+          <p className=" text-gray-300 text-[12px] mb-1">Recipient</p>
+          <div className=" flex border border-slate-500 px-2 py-3 rounded-md">
+            <input
+              className=" outline-none hover:outline-none bg-transparent text-white flex10"
+              placeholder="Enter or paste address"
+              onChange={(e) => setaddress(e.target.value)}
+              value={address}
+            />
+            <div
+              onClick={handleCopy}
+              className=" flex2 text-white  flex items-center justify-end cursor-pointer"
+            >
+              {copy ? (
+                <p className=" text-green-400 text-[13px]">pasted</p>
+              ) : (
+                <ContentCopyIcon style={{ fontSize: 12 }} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* the div containing the picture of the nft */}
+      <div className=" mt-10 flex flex-col gap-1">
+        <p className=" text-gray-300 text-[12px]">Collectible</p>
+        <div className=" border h-[70px] border-slate-500 rounded-md px-2 py-2 flex w-full">
+          <div className=" h-[100%]">
+            <Image
+              className=" h-[100%] w-[50px] object-cover rounded-sm"
+              src={`${solInfo.image}`}
+              height={20}
+              width={20}
+              alt={`${solInfo.name}`}
+            />
+          </div>
+          <div className=" text-white ml-2">
+            <p className=" text-[14px]">
+              {solInfo.name!.replace(/\0.*$/g, "")}
+            </p>
+            <p className=" text-gray-300 text-[14px]">
+              {solInfo.symbol!.replace(/\0.*$/g, "")}
+            </p>
+          </div>
+        </div>
+      </div>
+      <hr className=" mt-4 bg-slate-500 border-slate-500" />
+      <div
+        className={` mt-4 w-full py-3 flex items-center justify-center ${
+          address.length == 44
+            ? "bg-[tomato] text-white"
+            : "bg-gray-600 text-gray-400"
+        } rounded-md cursor-pointer`}
+      >
+        <p className=" ">Send</p>
+      </div>
     </div>
   );
 };
@@ -98,4 +170,9 @@ export const MoreDots = ({ nft }: { nft: Itoken }) => {
       </DropdownMenuContent>
     </DropdownMenu>
   );
+};
+
+// the div below contains the picture  and description of the NFT
+export const NftDetails = () => {
+  return <div></div>;
 };

@@ -472,7 +472,13 @@ export function SendBtn({
           )}
         </DrawerHeader>
         {value == "Send" ? (
-          <SendForm solInfo={solInfo} />
+          <div>
+            {isNft ? (
+              <NftSendBtnDiv solInfo={solInfo} />
+            ) : (
+              <SendForm solInfo={solInfo} />
+            )}
+          </div>
         ) : (
           <ReceiveForm portfiolo={portfiolo} solInfo={solInfo} />
         )}
