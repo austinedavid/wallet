@@ -2,7 +2,7 @@ import React from "react";
 import { cookies } from "next/headers";
 import { tokens } from "@/utils/getTokens";
 import { Breadcrum } from "../spec/spec-ui";
-import { Topdiv } from "./nft-ui";
+import { NftDetails, Topdiv } from "./nft-ui";
 
 const NftFeatures = async ({ id }: { id: string }) => {
   // here we get the cookies
@@ -19,6 +19,7 @@ const NftFeatures = async ({ id }: { id: string }) => {
     <div>
       <Breadcrum value={"collectible"} onetoken={spectNft} />
       <Topdiv nft={spectNft} />
+      <NftDetails nft={spectNft} />
     </div>
   );
 };

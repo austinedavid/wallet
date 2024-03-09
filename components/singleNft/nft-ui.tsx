@@ -173,6 +173,26 @@ export const MoreDots = ({ nft }: { nft: Itoken }) => {
 };
 
 // the div below contains the picture  and description of the NFT
-export const NftDetails = () => {
-  return <div></div>;
+export const NftDetails = ({ nft }: { nft: Itoken }) => {
+  return (
+    <div className=" w-full mt-4 flex flex-col sm:flex-row gap-4">
+      <div className=" flex-1 h-[400px] md:h-[400px]  lg:h-screen">
+        <Image
+          src={`${nft.image}`}
+          alt={`${nft.name}`}
+          width={200}
+          height={200}
+          className=" w-full h-[100%] rounded-md"
+        />
+      </div>
+      <div className=" flex-1 rounded-md overflow-hidden">
+        <div className=" w-full p-4 bg-slate-700 rounded-md">
+          <p className=" text-slate-300">
+            this is ehere the discription of everything appears to keep
+            everything very short we will find it soon
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 };
