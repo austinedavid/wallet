@@ -136,11 +136,11 @@ export const EachNft = ({ nft }: { nft: Itoken }) => {
       <div className=" w-full h-5/6">
         <Link href={`/wallet/collectible/${nft.address}`}>
           <Image
-            className=" w-full h-[100%] object-cover rounded-md"
+            className=" w-full h-[100%]  rounded-md"
             src={`${nft.image}`}
             alt={`${nft?.name}`}
-            width={50}
-            height={50}
+            width={200}
+            height={200}
           />
         </Link>
         <div className=" opacity-0 transition-opacity ease-in-out duration-300 group-hover:opacity-100 absolute w-[30px] h-[30px] rounded-full border-2 cursor-pointer border-white top-3 left-3"></div>
