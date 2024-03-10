@@ -13,9 +13,12 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LanguageIcon from "@mui/icons-material/Language";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
-import { useDownload } from "./nft-data-access";
+import { useDownload, useSubstringFour } from "./nft-data-access";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Image from "next/image";
+import TelegramIcon from "@mui/icons-material/Telegram";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import CloseIcon from "@mui/icons-material/Close";
 
 // exporting the top div in the individual nft page
 export const Topdiv = ({ nft }: { nft: Itoken }) => {
@@ -50,78 +53,32 @@ export const RightTop = ({ nft }: { nft: Itoken }) => {
 
 // this div consists of the things we need
 // for sending NFT to a particlar receiver
-export const NftSendBtnDiv = ({ solInfo }: { solInfo: Itoken }) => {
+export const NftSendBtnDiv = ({
+  solInfo,
+  setnotConfirm,
+}: {
+  solInfo: Itoken;
+  setnotConfirm: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   // state to control the copied icon
   const [copy, setcopy] = useState<boolean>(false);
   const [address, setaddress] = useState<string>("");
-  const handleCopy = async () => {
-    setcopy(true);
-    const clipboardItem = await window.navigator.clipboard.readText();
-    setaddress(clipboardItem);
-    setTimeout(() => {
-      setcopy(false);
-    }, 1000);
-  };
+  const [toConfirm, setToconfirm] = useState<boolean>(false);
   return (
     <div>
-      <div className=" flex flex-col gap-2 mt-2">
-        <hr className="bg-slate-500 border-slate-500" />
-        {/* the div containing the input for the address */}
-        <div className=" flex flex-col mt-2">
-          <p className=" text-gray-300 text-[12px] mb-1">Recipient</p>
-          <div className=" flex border border-slate-500 px-2 py-3 rounded-md">
-            <input
-              className=" outline-none hover:outline-none bg-transparent text-white flex10"
-              placeholder="Enter or paste address"
-              onChange={(e) => setaddress(e.target.value)}
-              value={address}
-            />
-            <div
-              onClick={handleCopy}
-              className=" flex2 text-white  flex items-center justify-end cursor-pointer"
-            >
-              {copy ? (
-                <p className=" text-green-400 text-[13px]">pasted</p>
-              ) : (
-                <ContentCopyIcon style={{ fontSize: 12 }} />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* the div containing the picture of the nft */}
-      <div className=" mt-10 flex flex-col gap-1">
-        <p className=" text-gray-300 text-[12px]">Collectible</p>
-        <div className=" border h-[70px] border-slate-500 rounded-md px-2 py-2 flex w-full">
-          <div className=" h-[100%]">
-            <Image
-              className=" h-[100%] w-[50px] object-cover rounded-sm"
-              src={`${solInfo.image}`}
-              height={20}
-              width={20}
-              alt={`${solInfo.name}`}
-            />
-          </div>
-          <div className=" text-white ml-2">
-            <p className=" text-[14px]">
-              {solInfo.name!.replace(/\0.*$/g, "")}
-            </p>
-            <p className=" text-gray-300 text-[14px]">
-              {solInfo.symbol!.replace(/\0.*$/g, "")}
-            </p>
-          </div>
-        </div>
-      </div>
-      <hr className=" mt-4 bg-slate-500 border-slate-500" />
-      <div
-        className={` mt-4 w-full py-3 flex items-center justify-center ${
-          address.length == 44
-            ? "bg-[tomato] text-white"
-            : "bg-gray-600 text-gray-400"
-        } rounded-md cursor-pointer`}
-      >
-        <p className=" ">Send</p>
-      </div>
+      {toConfirm ? (
+        <ConfirmDiv address={address} solInfo={solInfo} />
+      ) : (
+        <SendNftDiv
+          copy={copy}
+          address={address}
+          solInfo={solInfo}
+          setcopy={setcopy}
+          setaddress={setaddress}
+          setToconfirm={setToconfirm}
+          setnotConfirm={setnotConfirm}
+        />
+      )}
     </div>
   );
 };
@@ -187,10 +144,179 @@ export const NftDetails = ({ nft }: { nft: Itoken }) => {
       </div>
       <div className=" flex-1 rounded-md overflow-hidden">
         <div className=" w-full p-4 bg-slate-700 rounded-md">
+          <p className=" text-slate-400">Description</p>
           <p className=" text-slate-300">
             this is ehere the discription of everything appears to keep
             everything very short we will find it soon
           </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// this is the div that shows transfer nft before the confirm nft part
+interface SendInterface {
+  setcopy: React.Dispatch<React.SetStateAction<boolean>>;
+  solInfo: Itoken;
+  setaddress: React.Dispatch<React.SetStateAction<string>>;
+  setToconfirm: React.Dispatch<React.SetStateAction<boolean>>;
+  address: string;
+  copy: boolean;
+  setnotConfirm: React.Dispatch<React.SetStateAction<boolean>>;
+}
+export const SendNftDiv = ({
+  solInfo,
+  setcopy,
+  setaddress,
+  setToconfirm,
+  address,
+  copy,
+  setnotConfirm,
+}: SendInterface) => {
+  const handleCopy = async () => {
+    setcopy(true);
+    const clipboardItem = await window.navigator.clipboard.readText();
+    setaddress(clipboardItem);
+  };
+  return (
+    <div>
+      <div className=" flex flex-col gap-2 mt-2">
+        <hr className="bg-slate-500 border-slate-500" />
+        {/* the div containing the input for the address */}
+        <div className=" flex flex-col mt-2">
+          <p className=" text-gray-300 text-[12px] mb-1">Recipient</p>
+          <div className=" flex border border-slate-500 px-2 py-3 rounded-md">
+            <input
+              className=" outline-none hover:outline-none bg-transparent text-white flex10"
+              placeholder="Enter or paste address"
+              onChange={(e) => setaddress(e.target.value)}
+              value={address}
+            />
+            <div className=" flex2 text-white  flex items-center justify-end cursor-pointer">
+              {copy ? (
+                <CloseIcon
+                  onClick={() => {
+                    setcopy(false);
+                    setaddress("");
+                  }}
+                  style={{ fontSize: 14 }}
+                />
+              ) : (
+                <ContentCopyIcon
+                  onClick={handleCopy}
+                  style={{ fontSize: 12 }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* the div containing the picture of the nft */}
+      <NftSmallCard noMargin={false} solInfo={solInfo} />
+      <hr className=" mt-4 bg-slate-500 border-slate-500" />
+      <div
+        className={` mt-4 w-full py-3 flex items-center justify-center ${
+          address.length == 44
+            ? "bg-[tomato] text-white"
+            : "bg-gray-600 text-gray-400"
+        } rounded-md cursor-pointer`}
+        onClick={() => {
+          setToconfirm(true);
+          setnotConfirm(false);
+        }}
+      >
+        <p className=" ">Send</p>
+      </div>
+    </div>
+  );
+};
+
+export const NftSmallCard = ({
+  solInfo,
+  noMargin,
+}: {
+  solInfo: Itoken;
+  noMargin: boolean;
+}) => {
+  return (
+    <div className={` ${!noMargin && " mt-10"} flex flex-col gap-1`}>
+      {!noMargin && <p className=" text-gray-300 text-[12px]">Collectible</p>}
+      <div
+        className={` ${
+          !noMargin
+            ? "border-slate-500 border rounded-md px-2 py-2 h-[70px]"
+            : " h-[50px]"
+        } flex w-full`}
+      >
+        <div className={`h-[100%]`}>
+          <Image
+            className={`h-[100%] w-[50px] object-cover rounded-sm`}
+            src={`${solInfo.image}`}
+            height={20}
+            width={20}
+            alt={`${solInfo.name}`}
+          />
+        </div>
+        <div className=" text-white ml-2">
+          <p className=" text-[14px]">{solInfo.name!.replace(/\0.*$/g, "")}</p>
+          <p className=" text-gray-300 text-[14px]">
+            {solInfo.symbol!.replace(/\0.*$/g, "")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// this div handles the confirmation of the nft sending
+export const ConfirmDiv = ({
+  solInfo,
+  address,
+}: {
+  solInfo: Itoken;
+  address: string;
+}) => {
+  return (
+    <div className=" w-full justify-center items-center flex flex-col gap-4">
+      <p className=" text-white font-bold">Confirm Transaction</p>
+      <SendMidleDiv address={address} solInfo={solInfo} />
+    </div>
+  );
+};
+
+export const SendMidleDiv = ({
+  solInfo,
+  address,
+}: {
+  solInfo: Itoken;
+  address: string;
+}) => {
+  const { joinString } = useSubstringFour(address);
+  return (
+    <div className=" w-full flex flex-col justify-center items-center gap-3 ">
+      <div className=" text-white w-[80px] h-[80px] bg-slate-500 h-50 rounded-full flex items-center justify-center">
+        <TelegramIcon style={{ fontSize: 30 }} />
+      </div>
+
+      <div className="w-full p-2 flex flex-col item-start border border-slate-500 gap-2 rounded-md ">
+        <NftSmallCard noMargin={true} solInfo={solInfo} />
+        <div className="items-start flex flex-col ml-3">
+          <KeyboardArrowDownIcon className=" text-slate-400" />
+          <KeyboardArrowDownIcon className=" text-white -mt-3" />
+        </div>
+        <div className=" flex items-center gap-1 -mt-2">
+          <div className=" ml-[3px] w-[40px] h-[40px] rounded-full bg-gradient-to-r from-slate-300 to-[tomato]"></div>
+          <p className="  text-slate-200 text-sm">{joinString}</p>
+        </div>
+      </div>
+      {/* the send NFT final button below here */}
+      <div className=" w-full flex gap-2 mt-6">
+        <div className=" cursor-pointer font-bold  p-3 flex items-center justify-center text-white bg-slate-600 rounded-md flex-1">
+          <p>Cancel</p>
+        </div>
+        <div className=" cursor-pointer font-bold  p-3 flex items-center justify-center black bg-[tomato] rounded-md flex-1">
+          <p>Confirm</p>
         </div>
       </div>
     </div>

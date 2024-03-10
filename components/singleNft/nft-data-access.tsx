@@ -29,3 +29,10 @@ export const useDownload = () => {
 
   return { handleDownload, goToExplorer };
 };
+
+export const useSubstringFour = (address: string) => {
+  const firstPath = address.substring(0, 4);
+  const lastPart = address.substring(address.length - 4, address.length);
+  const joinString = `${firstPath}...${lastPart}`;
+  return { joinString };
+};

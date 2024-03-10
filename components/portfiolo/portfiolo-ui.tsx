@@ -414,6 +414,7 @@ export function SendBtn({
 }) {
   const { isDesktop } = useMediaQuery();
   const [open, setOpen] = React.useState(false);
+  const [notConfirm, setnotConfirm] = useState(true);
 
   if (isDesktop) {
     return (
@@ -431,14 +432,17 @@ export function SendBtn({
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px] bg-slate-900">
           <DialogHeader>
-            {value == "Send" && (
+            {value == "Send" && notConfirm && (
               <DialogTitle className="text-white">Send</DialogTitle>
             )}
           </DialogHeader>
           {value == "Send" ? (
             <div>
               {isNft ? (
-                <NftSendBtnDiv solInfo={solInfo} />
+                <NftSendBtnDiv
+                  setnotConfirm={setnotConfirm}
+                  solInfo={solInfo}
+                />
               ) : (
                 <SendForm solInfo={solInfo} />
               )}
@@ -467,14 +471,14 @@ export function SendBtn({
       </DrawerTrigger>
       <DrawerContent className="px-4 bg-slate-900">
         <DrawerHeader className="text-left">
-          {value == "Send" && (
+          {value == "Send" && notConfirm && (
             <DrawerTitle className=" text-white font-bold">Send</DrawerTitle>
           )}
         </DrawerHeader>
         {value == "Send" ? (
           <div>
             {isNft ? (
-              <NftSendBtnDiv solInfo={solInfo} />
+              <NftSendBtnDiv setnotConfirm={setnotConfirm} solInfo={solInfo} />
             ) : (
               <SendForm solInfo={solInfo} />
             )}
