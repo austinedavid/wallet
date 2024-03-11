@@ -16,10 +16,10 @@ export const GeneralLang = ({
   desc: string;
 }) => {
   return (
-    <div className=" flex items-center justify-between">
+    <div className=" flex items-center justify-between gap-1">
       <div>
         <p className=" text-lg text-white font-bold">{title}</p>
-        <p className=" text-slate-300 text-[15px]">{desc}</p>
+        <p className=" text-slate-300 text-[10px] sm:text-[15px]">{desc}</p>
       </div>
       <SelectBtn />
     </div>
