@@ -81,3 +81,10 @@
 .flex2 {
   flex: 2;
 }
+
+.flex1 {
+  flex: 1;
+}
+.flex3 {
+  flex: 3;
+}
