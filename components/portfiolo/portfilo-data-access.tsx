@@ -1,8 +1,17 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getSolsInfo, Itoken } from "@/utils/getTokens";
-import { Connection, PublicKey, clusterApiUrl, Keypair } from "@solana/web3.js";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Connection,
+  PublicKey,
+  clusterApiUrl,
+  Keypair,
+  SystemProgram,
+  LAMPORTS_PER_SOL,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { walletKeypair } from "@/utils/getWallet";
 import Cookies from "js-cookie";
@@ -57,4 +66,53 @@ export const useWallet = () => {
   }, []);
 
   return { newKeypair, pubkey };
+};
+
+const walletdetails = (): { pubkey: string; newKeypair: Keypair } => {
+  const cookies = Cookies.get("secrete-seed") as string;
+  const numberArray = cookies.split(",").map(Number);
+
+  const uintArray = Uint8Array.from(numberArray);
+  const newKeypair = Keypair.fromSecretKey(uintArray);
+
+  const pubkey = newKeypair.publicKey.toBase58();
+  return { pubkey, newKeypair };
+};
+
+export const useSendToken = () => {
+  // getting the keypair
+  const { newKeypair, pubkey } = walletdetails();
+  const ourPubkey = new PublicKey(pubkey);
+  // creating a connection with solana blockchain
+  const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  const mutation = useMutation({
+    mutationKey: ["getalltokens"],
+    mutationFn: async (options: { toAddress: string; amt: number }) => {
+      console.log(options.amt);
+      console.log(options.amt);
+      const toPubkey = new PublicKey(options.toAddress);
+      // creating an instruction
+      const sendInstruction = SystemProgram.transfer({
+        fromPubkey: ourPubkey,
+        toPubkey: toPubkey,
+        lamports: options.amt * LAMPORTS_PER_SOL,
+      });
+      // creating a transaction
+      const { blockhash, lastValidBlockHeight } =
+        await connection.getLatestBlockhash("finalized");
+      const tx = new Transaction();
+      tx.feePayer = ourPubkey;
+      tx.lastValidBlockHeight = lastValidBlockHeight;
+      tx.recentBlockhash = blockhash;
+      tx.add(sendInstruction);
+      const confirmTrabsaction = await sendAndConfirmTransaction(
+        connection,
+        tx,
+        [newKeypair!]
+      );
+    },
+    onSuccess: () => {},
+  });
+
+  return { mutation };
 };

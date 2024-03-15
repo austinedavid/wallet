@@ -29,12 +29,17 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { userSubstring, useCopy, useWallet } from "./portfilo-data-access";
+import {
+  userSubstring,
+  useCopy,
+  useWallet,
+  useSendToken,
+} from "./portfilo-data-access";
 import { useRouter } from "next/navigation";
 import { createQR } from "@solana/pay";
 import { Toaster } from "react-hot-toast";
 import { RightForCollection } from "@/components/collection/collection-ui";
-import { NftSendBtnDiv } from "../singleNft/nft-ui";
+import { ConfirmDiv, NftSendBtnDiv } from "../singleNft/nft-ui";
 import { useDownload } from "../singleNft/nft-data-access";
 // the first div in the portfiolo component and also in the collection
 export const SharedDiv = ({
@@ -444,7 +449,7 @@ export function SendBtn({
                   solInfo={solInfo}
                 />
               ) : (
-                <SendForm solInfo={solInfo} />
+                <SendForm setnotConfirm={setnotConfirm} solInfo={solInfo} />
               )}
             </div>
           ) : (
@@ -480,7 +485,7 @@ export function SendBtn({
             {isNft ? (
               <NftSendBtnDiv setnotConfirm={setnotConfirm} solInfo={solInfo} />
             ) : (
-              <SendForm solInfo={solInfo} />
+              <SendForm setnotConfirm={setnotConfirm} solInfo={solInfo} />
             )}
           </div>
         ) : (
@@ -493,56 +498,92 @@ export function SendBtn({
   );
 }
 
-function SendForm({ solInfo }: { solInfo: Itoken }) {
+function SendForm({
+  solInfo,
+  setnotConfirm,
+}: {
+  solInfo: Itoken;
+  setnotConfirm: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const [toConfirm, setToconfirm] = useState<boolean>(false);
+  const [amt, setamt] = useState<number>();
+  const [address, setToadress] = useState<string>("");
   const { joinedPath } = userSubstring(solInfo.address as string);
+
   return (
-    <div className=" flex flex-col space-y-3 mt-6">
-      {/* div for the first part and also the text and the input */}
-      <div>
-        <div className=" w-full flex items-center justify-between mb-[5px]">
-          <p className=" text-gray-400 text-[12px]">Token</p>
-          <p className=" text-white text-[12px]">
-            Max:{solInfo.amt.toFixed(5)}
-          </p>
-        </div>
-        <div className=" w-full flex items-center py-3 px-2 bg-slate-800 rounded-sm space-x-1">
-          <div className=" flex  w-[130px] space-x-2 items-center">
-            {solInfo.image ? (
-              <Image
-                className="rounded-full"
-                src={solInfo?.image!}
-                alt=""
-                width={20}
-                height={20}
-              />
-            ) : (
-              <NoImageDiv big={false} />
-            )}
-            {solInfo.symbol ? (
-              <p className="text-white font-bold">
-                {solInfo.symbol.replace(/\0.*$/g, "")}
+    <div>
+      {toConfirm ? (
+        <ConfirmDiv
+          nft={false}
+          sol={false}
+          address={address}
+          solInfo={solInfo}
+          amt={amt as number}
+        />
+      ) : (
+        <div className=" flex flex-col space-y-3 mt-6">
+          {/* div for the first part and also the text and the input */}
+          <div>
+            <div className=" w-full flex items-center justify-between mb-[5px]">
+              <p className=" text-gray-400 text-[12px]">Token</p>
+              <p className=" text-white text-[12px]">
+                Max:{solInfo.amt.toFixed(5)}
               </p>
-            ) : (
-              <p className="text-white font-bold">{joinedPath}</p>
-            )}
+            </div>
+            <div className=" w-full flex items-center py-3 px-2 bg-slate-800 rounded-sm space-x-1">
+              <div className=" flex  w-[130px] space-x-2 items-center">
+                {solInfo.image ? (
+                  <Image
+                    className="rounded-full"
+                    src={solInfo?.image!}
+                    alt=""
+                    width={20}
+                    height={20}
+                  />
+                ) : (
+                  <NoImageDiv big={false} />
+                )}
+                {solInfo.symbol ? (
+                  <p className="text-white font-bold">
+                    {solInfo.symbol.replace(/\0.*$/g, "")}
+                  </p>
+                ) : (
+                  <p className="text-white font-bold">{joinedPath}</p>
+                )}
+              </div>
+              <input
+                onChange={(e) => setamt(Number(e.target.value))}
+                type="text"
+                value={amt}
+                className=" text-right rtl bg-transparent text-gray-400 w-[calc(100%-130px)] border-0 border-transparent focus:outline-none"
+              />
+            </div>
           </div>
-          <input
-            type="text"
-            className=" text-right rtl bg-transparent text-gray-400 w-[calc(100%-130px)] border-0 border-transparent focus:outline-none"
-          />
+          {/* div for the second part */}
+          <div className=" flex flex-col space-y-[5px] ">
+            <p className=" text-gray-400 text-[12px]">Recipient</p>
+            <div className=" py-3 px-2 bg-slate-800 rounded-sm w-full flex items-center">
+              <input
+                value={address}
+                onChange={(e) => setToadress(e.target.value)}
+                className=" bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none"
+              />
+            </div>
+          </div>
+          <hr className="bg-gray-500 border-gray-500 mt-4 mb-4" />
+          <div
+            onClick={() => {
+              setnotConfirm(false);
+              setToconfirm(true);
+            }}
+            className={` cursor-pointer w-full py-3 flex items-center justify-center rounded-md ${
+              address.length == 44 ? " bg-[tomato]" : "bg-slate-600"
+            } text-white font-bold`}
+          >
+            <p>Send</p>
+          </div>
         </div>
-      </div>
-      {/* div for the second part */}
-      <div className=" flex flex-col space-y-[5px] ">
-        <p className=" text-gray-400 text-[12px]">Recipient</p>
-        <div className=" py-3 px-2 bg-slate-800 rounded-sm w-full flex items-center">
-          <input className=" bg-transparent text-gray-400 w-full border-0 border-transparent focus:outline-none" />
-        </div>
-      </div>
-      <hr className="bg-gray-500 border-gray-500 mt-4 mb-4" />
-      <div className=" cursor-pointer w-full py-3 flex items-center justify-center rounded-md bg-slate-600 text-white font-bold">
-        <p>Send</p>
-      </div>
+      )}
     </div>
   );
 }

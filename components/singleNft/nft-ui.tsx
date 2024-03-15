@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Itoken } from "@/utils/getTokens";
-import { SendBtn } from "../portfiolo/portfiolo-ui";
+import { NoImageDiv, SendBtn } from "../portfiolo/portfiolo-ui";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ import Image from "next/image";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CloseIcon from "@mui/icons-material/Close";
+import { motion } from "framer-motion";
 
 // exporting the top div in the individual nft page
 export const Topdiv = ({ nft }: { nft: Itoken }) => {
@@ -64,10 +65,17 @@ export const NftSendBtnDiv = ({
   const [copy, setcopy] = useState<boolean>(false);
   const [address, setaddress] = useState<string>("");
   const [toConfirm, setToconfirm] = useState<boolean>(false);
+  const [amt, setamt] = useState<number>(10e-9);
   return (
     <div>
       {toConfirm ? (
-        <ConfirmDiv address={address} solInfo={solInfo} />
+        <ConfirmDiv
+          amt={amt}
+          nft={true}
+          sol={false}
+          address={address}
+          solInfo={solInfo}
+        />
       ) : (
         <SendNftDiv
           copy={copy}
@@ -213,7 +221,7 @@ export const SendNftDiv = ({
         </div>
       </div>
       {/* the div containing the picture of the nft */}
-      <NftSmallCard noMargin={false} solInfo={solInfo} />
+      <NftSmallCard amt={1} nft={true} noMargin={false} solInfo={solInfo} />
       <hr className=" mt-4 bg-slate-500 border-slate-500" />
       <div
         className={` mt-4 w-full py-3 flex items-center justify-center ${
@@ -235,10 +243,15 @@ export const SendNftDiv = ({
 export const NftSmallCard = ({
   solInfo,
   noMargin,
+  nft,
+  amt,
 }: {
   solInfo: Itoken;
   noMargin: boolean;
+  nft: boolean;
+  amt: number;
 }) => {
+  const { joinString } = useSubstringFour(solInfo.address as string);
   return (
     <div className={` ${!noMargin && " mt-10"} flex flex-col gap-1`}>
       {!noMargin && <p className=" text-gray-300 text-[12px]">Collectible</p>}
@@ -247,22 +260,45 @@ export const NftSmallCard = ({
           !noMargin
             ? "border-slate-500 border rounded-md px-2 py-2 h-[70px]"
             : " h-[50px]"
-        } flex w-full`}
+        } flex w-full items-center`}
       >
         <div className={`h-[100%]`}>
-          <Image
-            className={`h-[100%] w-[50px] object-cover rounded-sm`}
-            src={`${solInfo.image}`}
-            height={20}
-            width={20}
-            alt={`${solInfo.name}`}
-          />
+          {/* show token image or sol images or don't show image if tokens dont have */}
+          {nft || solInfo.image ? (
+            <Image
+              className={`h-[100%] w-[50px] object-cover ${
+                nft ? "rounded-sm" : " rounded-full"
+              }`}
+              src={`${solInfo.image}`}
+              height={20}
+              width={20}
+              alt={`${solInfo.name}`}
+            />
+          ) : (
+            <NoImageDiv big={false} />
+          )}
         </div>
         <div className=" text-white ml-2">
-          <p className=" text-[14px]">{solInfo.name!.replace(/\0.*$/g, "")}</p>
-          <p className=" text-gray-300 text-[14px]">
-            {solInfo.symbol!.replace(/\0.*$/g, "")}
-          </p>
+          {/* leave below at it default for nft and then change for sol and other token with the amt and symbol (1 SOL) */}
+          {nft ? (
+            <div>
+              <p className=" text-[14px]">
+                {solInfo.name!.replace(/\0.*$/g, "")}
+              </p>
+              <p className=" text-gray-300 text-[14px]">
+                {solInfo.symbol!.replace(/\0.*$/g, "")}
+              </p>
+            </div>
+          ) : (
+            <div className=" flex items-center space-x-1">
+              <p>{amt}</p>
+              {solInfo.symbol ? (
+                <p>{solInfo.symbol!.replace(/\0.*$/g, "")}</p>
+              ) : (
+                <p>{joinString}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -273,14 +309,26 @@ export const NftSmallCard = ({
 export const ConfirmDiv = ({
   solInfo,
   address,
+  nft,
+  sol,
+  amt,
 }: {
   solInfo: Itoken;
   address: string;
+  nft: boolean;
+  sol: boolean;
+  amt: number;
 }) => {
   return (
     <div className=" w-full justify-center items-center flex flex-col gap-4">
       <p className=" text-white font-bold">Confirm Transaction</p>
-      <SendMidleDiv address={address} solInfo={solInfo} />
+      <SendMidleDiv
+        amt={amt}
+        sol={sol}
+        nft={nft}
+        address={address}
+        solInfo={solInfo}
+      />
     </div>
   );
 };
@@ -288,9 +336,15 @@ export const ConfirmDiv = ({
 export const SendMidleDiv = ({
   solInfo,
   address,
+  sol,
+  nft,
+  amt,
 }: {
   solInfo: Itoken;
   address: string;
+  sol: boolean;
+  nft: boolean;
+  amt: number;
 }) => {
   const { joinString } = useSubstringFour(address);
   return (
@@ -300,7 +354,7 @@ export const SendMidleDiv = ({
       </div>
 
       <div className="w-full p-2 flex flex-col item-start border border-slate-500 gap-2 rounded-md ">
-        <NftSmallCard noMargin={true} solInfo={solInfo} />
+        <NftSmallCard amt={amt} nft={nft} noMargin={true} solInfo={solInfo} />
         <div className="items-start flex flex-col ml-3">
           <KeyboardArrowDownIcon className=" text-slate-400" />
           <KeyboardArrowDownIcon className=" text-white -mt-3" />
@@ -311,13 +365,23 @@ export const SendMidleDiv = ({
         </div>
       </div>
       {/* the send NFT final button below here */}
-      <div className=" w-full flex gap-2 mt-6">
-        <div className=" cursor-pointer font-bold  p-3 flex items-center justify-center text-white bg-slate-600 rounded-md flex-1">
+      <div className=" w-full flex gap-3 mt-6">
+        <motion.div
+          whileHover={{ scale: 1.07 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", duration: 1 }}
+          className=" cursor-pointer font-bold  p-3 flex items-center justify-center text-white bg-slate-600 rounded-md flex-1"
+        >
           <p>Cancel</p>
-        </div>
-        <div className=" cursor-pointer font-bold  p-3 flex items-center justify-center black bg-[tomato] rounded-md flex-1">
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.07 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", duration: 2 }}
+          className=" cursor-pointer font-bold  p-3 flex items-center justify-center black bg-[tomato] rounded-md flex-1"
+        >
           <p>Confirm</p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
