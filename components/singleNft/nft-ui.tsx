@@ -377,7 +377,7 @@ export const SendMidleDiv = ({
         <motion.div
           whileHover={{ scale: 1.07 }}
           whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", duration: 2 }}
+          transition={{ type: "spring", duration: 1 }}
           className=" cursor-pointer font-bold  p-3 flex items-center justify-center black bg-[tomato] rounded-md flex-1"
         >
           <p>Confirm</p>
