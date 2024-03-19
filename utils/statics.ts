@@ -10,7 +10,7 @@ import PermContactCalendarIcon from "@mui/icons-material/PermContactCalendar";
 import ShieldIcon from "@mui/icons-material/Shield";
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 // the array containing the sub item for the setting side nav
-interface Isettings {
+export interface Isettings {
   name: string;
   path: string;
   icon: any;
