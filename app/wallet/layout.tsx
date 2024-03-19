@@ -3,7 +3,7 @@ import React from "react";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div>
+    <div className=" w-full overflow-x-hidden">
       <Nav />
       {children}
     </div>

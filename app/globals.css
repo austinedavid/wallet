@@ -88,3 +88,6 @@
 .flex3 {
   flex: 3;
 }
+.index {
+  z-index: 9999999 !important;
+}
