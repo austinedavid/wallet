@@ -37,10 +37,12 @@ export const RightPart = () => {
 interface setPage {
   setpage: Dispatch<SetStateAction<number>>;
   seedArray: string[];
+  showconfirm?: boolean;
 }
 export const LeftPart = () => {
   const [page, setpage] = useState<number>(0);
   const { getseed, mnemoicArray } = useMnemonic();
+  const [showconfirm, setshowconfirm] = useState<boolean>(false);
   const staticd = "david";
   if (getseed.isLoading) {
     return (
@@ -54,17 +56,23 @@ export const LeftPart = () => {
   return (
     <div className=" flex-1 h-full bg-slate-900 text-white px-4 relative pb-2">
       <Nav />
-      <Fewtext page={page} />
+      <Fewtext page={page} showconfirm={showconfirm} />
       {/* here we render the dynamic changing part of this page below based on the state on page we have */}
       {page == 0 ? (
         <GeneratePhrase seedArray={mnemoicArray} setpage={setpage} />
       ) : page == 1 ? (
-        <ConfirmPhrase seedArray={mnemoicArray} setpage={setpage} />
+        <ConfirmPhrase
+          showconfirm={showconfirm}
+          seedArray={mnemoicArray}
+          setpage={setpage}
+        />
       ) : (
         <Enterpassword />
       )}
       {/* already have a wallet section */}
-      <AlreadyHaveWallet />
+      {!showconfirm && (
+        <AlreadyHaveWallet setshowconfirm={setshowconfirm} setpage={setpage} />
+      )}
     </div>
   );
 };
@@ -80,7 +88,13 @@ export const Nav = () => {
   );
 };
 // the first few text before the main seed phrase
-export const Fewtext = ({ page }: { page: number }) => {
+export const Fewtext = ({
+  page,
+  showconfirm,
+}: {
+  page: number;
+  showconfirm: boolean;
+}) => {
   return (
     <>
       {page == 0 ? (
@@ -90,10 +104,19 @@ export const Fewtext = ({ page }: { page: number }) => {
         </div>
       ) : page == 1 ? (
         <div>
-          <h3>Please enter or paste the Phrase you copied</h3>
-          <p className="text-sm">
-            Remember thundersol will never ask about your phrase
-          </p>
+          {showconfirm ? (
+            <div>
+              <p>Please proceed to enter or paste your seed phrase</p>
+              <p>Remember thundersol will never ask about your phrase</p>
+            </div>
+          ) : (
+            <div>
+              <h3>Please enter or paste the Phrase you copied</h3>
+              <p className="text-sm">
+                Remember thundersol will never ask about your phrase
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div></div>
@@ -138,7 +161,7 @@ export const GeneratePhrase = ({ seedArray, setpage }: setPage) => {
   );
 };
 // confirm the phrase
-export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
+export const ConfirmPhrase = ({ seedArray, setpage, showconfirm }: setPage) => {
   const [words, setword] = useState(Array(seedArray.length).fill(""));
   const { setLocalStorage } = useMnemonic();
   // lets fill in the array of word state with this function
@@ -149,13 +172,18 @@ export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
   };
   // here, we verify if the both arrays are the same
   const handleConfirm = () => {
-    const firstArrays = seedArray.join(" ");
-    const secondArrays = words.join(" ");
-    if (firstArrays != secondArrays) {
-      return alert("not equal");
+    if (!showconfirm) {
+      const firstArrays = seedArray.join(" ");
+      const secondArrays = words.join(" ");
+      if (firstArrays != secondArrays) {
+        return alert("not equal");
+      }
+      setLocalStorage(seedArray.join(" "));
+      setpage(2);
+    } else {
+      setLocalStorage(words.join(" "));
+      setpage(2);
     }
-    setLocalStorage(seedArray.join(" "));
-    setpage(2);
   };
   // paste the copied item to the boxes
   const handlepaste = async () => {
@@ -191,7 +219,9 @@ export const ConfirmPhrase = ({ seedArray, setpage }: setPage) => {
           onClick={handleConfirm}
           className=" cursor-pointer flex items-center justify-center w-[50%] md:w-[40%] ease-in-out duration-700 transition px-4 py-2 bg-gradient-to-r from-[tomato] to-yellow-600 hover:bg-gradient-to-r hover:from-yellow-600 hover:to-[tomato]  rounded-md"
         >
-          <p className=" text-[12px] md:text-[18px]">CONFIRM PHRASE</p>
+          <p className=" text-[12px] md:text-[18px]">
+            {showconfirm ? "SUBMIT AND PROCEED" : "CONFIRM PHRASE"}
+          </p>
         </div>
       </div>
     </>
@@ -242,12 +272,27 @@ export const Enterpassword = () => {
 };
 
 // already have a wallet section
-export const AlreadyHaveWallet = () => {
+export const AlreadyHaveWallet = ({
+  setpage,
+  setshowconfirm,
+}: {
+  setpage: Dispatch<SetStateAction<number>>;
+  setshowconfirm: Dispatch<SetStateAction<boolean>>;
+}) => {
+  const handleHaveAccount = () => {
+    setpage(1);
+    setshowconfirm(true);
+  };
   return (
     <div className=" w-full flex items-center justify-center md:absolute md:bottom-4 md:left-auto">
       <div className=" flex mt-[50px] gap-2">
         <p>Already have a wallet?</p>
-        <p className=" text-[tomato] cursor-pointer">Access it here</p>
+        <p
+          className=" text-[tomato] cursor-pointer"
+          onClick={handleHaveAccount}
+        >
+          Access it here
+        </p>
       </div>
     </div>
   );

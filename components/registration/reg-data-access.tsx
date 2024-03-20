@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as mnemonic from "bip39";
 import Cookies from "js-cookie";
 import { Keypair } from "@solana/web3.js";
+import bcryptjs from "bcryptjs";
 
 // created custome hook to handle everything about wallet setup
 // authentication and routing to portfiolo if there is password
@@ -43,7 +44,13 @@ export const useMnemonic = () => {
     Cookies.set("secrete-seed", seedArray, { expires: 10 * 365 });
   };
   const savePassword = (item: string) => {
-    Cookies.set("wallet-password", item);
+    const { setSettings } = useSettings();
+    // lets generate a hash for this password
+    const hashedpassword = bcryptjs.hashSync(item, 10);
+    Cookies.set("wallet-password", hashedpassword);
+    setSettings("currency", "United States Dollar (USD)");
+    setSettings("language", "English");
+    setSettings("network", "Devnet");
     route.push("/wallet/portfiolo");
   };
   // this function downloads the seed phrase when clicked with the name
@@ -78,4 +85,29 @@ export const useVerify = () => {
   if (user) {
     return route.push("/wallet/portfiolo");
   }
+};
+
+// this function handles other things like setting the network, the currency and the language we need
+export const useSettings = () => {
+  // we will use the function below to set the items in the local storage
+  const setSettings = (item: string, value: string) => {
+    if (item == "currency") {
+      Cookies.set("currency", value, { expires: 10 * 365 });
+    } else if (item == "language") {
+      Cookies.set("language", value, { expires: 10 * 365 });
+    } else {
+      Cookies.set("network", value, { expires: 10 * 365 });
+    }
+  };
+  // here we use this function to get the setting we seek
+  const getSettings = (item: string) => {
+    if (item == "currency") {
+      return Cookies.get("currency");
+    } else if (item == "language") {
+      return Cookies.get("language");
+    } else {
+      return Cookies.get("network");
+    }
+  };
+  return { setSettings, getSettings };
 };

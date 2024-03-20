@@ -21,3 +21,36 @@ export const settingItems: Isettings[] = [
   { name: "Security & privacy", path: "security", icon: ShieldIcon },
   { name: "Support", path: "support", icon: LiveHelpIcon },
 ];
+
+// LIST OF CURRENCY FOR
+export const Languages: string[] = [
+  "English",
+  "Chinese",
+  "Dutch",
+  "French",
+  "German",
+  "Indonesian",
+  "Korean",
+  "Malaysia",
+  "Ukrainian",
+];
+// THE LIST OF DEVELOPMENT NETWORK
+export const Networks: string[] = ["Mainnet", "Testnet", "Devnet"];
+// LIST OF CURRENCY BELOW
+export const Currencies: string[] = [
+  " United States Dollar (USD)",
+  " Euro (EUR)",
+  " Japanese Yen (JPY)",
+  " British Pound Sterling (GBP)",
+  " Australian Dollar (AUD)",
+  " Canadian Dollar (CAD)",
+  " Swiss Franc (CHF)",
+  " Chinese Yuan (CNY)",
+  " Swedish Krona (SEK)",
+  " New Zealand Dollar (NZD)",
+  " Mexican Peso (MXN)",
+  " Singapore Dollar (SGD)",
+  " Hong Kong Dollar (HKD)",
+  " Norwegian Krone (NOK)",
+  " South Korean Won (KRW)",
+];
