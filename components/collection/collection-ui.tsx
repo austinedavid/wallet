@@ -80,7 +80,9 @@ export const FirstDropDown = () => {
             <p>Highest total Value</p>
           </DropdownMenuItem>
           <DropdownMenuItem className=" flex space-x-1 cursor-pointer">
-            <LoyaltyIcon />
+            <div>
+              <LoyaltyIcon />
+            </div>
             <p>Highest floor Price</p>
           </DropdownMenuItem>
           <DropdownMenuItem className=" flex space-x-1 cursor-pointer">
