@@ -365,6 +365,9 @@ export const SendMidleDiv = ({
         </div>
       </div>
       {/* the send NFT final button below here */}
+      <p className=" font-bold text-red-700">
+        something is supposed to be here please
+      </p>
       <div className=" w-full flex gap-3 mt-6">
         <motion.div
           whileHover={{ scale: 1.07 }}
