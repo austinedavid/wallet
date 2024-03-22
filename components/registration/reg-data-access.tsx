@@ -11,6 +11,7 @@ import bcryptjs from "bcryptjs";
 // created custome hook to handle everything about wallet setup
 // authentication and routing to portfiolo if there is password
 export const useMnemonic = () => {
+  const { setSettings } = useSettings();
   const route = useRouter();
   const [nstring, setnstring] = useState("");
   const [nstring1, setnstring1] = useState("");
@@ -44,7 +45,6 @@ export const useMnemonic = () => {
     Cookies.set("secrete-seed", seedArray, { expires: 10 * 365 });
   };
   const savePassword = (item: string) => {
-    const { setSettings } = useSettings();
     // lets generate a hash for this password
     const hashedpassword = bcryptjs.hashSync(item, 10);
     Cookies.set("wallet-password", hashedpassword);
