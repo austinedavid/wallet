@@ -53,6 +53,7 @@ export const SelectBtn = ({
       <SelectContent className=" bg-slate-600 focus:outline-none focus:bg-slate-600 text-white font-bold">
         {item.map((item, index) => (
           <SelectItem
+            key={index}
             className=" hover:bg-slate-700 flex justify-between"
             value={item}
           >
