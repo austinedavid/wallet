@@ -52,7 +52,7 @@ export const SharedDiv = ({
   collection: boolean;
 }) => {
   return (
-    <>
+    <div>
       <div className=" w-full md:h-[70px] sm:bg-slate-700 rounded-md px-4 py-2 flex flex-col sm:flex-row items-center sm:items-start md:items-center justify-center sm:justify-between gap-2 sm:gap-0 ">
         <div className=" flex flex-col md:flex-row items-center gap-4 md:gap-8 h-full">
           <DivwithPrice
@@ -76,7 +76,7 @@ export const SharedDiv = ({
         </div>
       </div>
       <Toaster />
-    </>
+    </div>
   );
 };
 // the div showing the sol price

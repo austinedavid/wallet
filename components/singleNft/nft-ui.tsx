@@ -352,9 +352,7 @@ export const SendMidleDiv = ({
       <div className=" text-white w-[80px] h-[80px] bg-slate-500 h-50 rounded-full flex items-center justify-center">
         <TelegramIcon style={{ fontSize: 30 }} />
       </div>
-      <p className=" font-bold text-red-700">
-        something is supposed to be here please
-      </p>
+
       <div className="w-full p-2 flex flex-col item-start border border-slate-500 gap-2 rounded-md ">
         <NftSmallCard amt={amt} nft={nft} noMargin={true} solInfo={solInfo} />
         <div className="items-start flex flex-col ml-3">
@@ -365,17 +363,9 @@ export const SendMidleDiv = ({
           <div className=" ml-[3px] w-[40px] h-[40px] rounded-full bg-gradient-to-r from-slate-300 to-[tomato]"></div>
           <p className="  text-slate-200 text-sm">{joinString}</p>
         </div>
-        <p className=" font-bold text-red-700">
-          something is supposed to be here please
-        </p>
-        <p className=" font-bold text-red-700">
-          something is supposed to be here please
-        </p>
       </div>
       {/* the send NFT final button below here */}
-      <p className=" font-bold text-red-700">
-        something is supposed to be here please
-      </p>
+
       <div className=" w-full flex gap-3 mt-6">
         <motion.div
           whileHover={{ scale: 1.07 }}
